@@ -1,0 +1,250 @@
+<html>
+
+<head>
+    <title>Physics test</title>
+    <style>
+    html,
+    body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    </style>
+</head>
+<script src="node_modules/p2/build/p2.js"></script>
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+
+<body>
+    <canvas style="border: 1px solid black;" width="800" height="600"id="canvas"></canvas>
+    <script>
+    var canvas, ctx, w, h,
+        world, planeBody;
+
+    var players = [];
+    var mainPlayerId;
+
+    var Player = function(id, x,y) {
+        this.id = id;
+        this.force = .4;
+        this.circleShape = new p2.Circle({
+            radius: 1
+        });
+        this.circleBody = new p2.Body({
+            mass: 1,
+            position: [x, y],
+            angularVelocity: 1
+        });
+        this.circleBody.addShape(this.circleShape);
+        this.input = {
+            w: false,
+            a: false,
+            s: false,
+            d: false
+        };
+
+        this.updateState  = function(dt) {
+            this.circleBody.applyDamping(dt);
+        };
+
+        this.draw = function() {
+            ctx.beginPath();
+            var x = this.circleBody.position[0],
+                y = this.circleBody.position[1];
+            ctx.save();
+            ctx.translate(x, y); // Translate to the center of the circle
+            ctx.rotate(this.circleBody.angle); // Rotate to the circle body frame
+            ctx.arc(0, 0, 1, 0, 2 * Math.PI);
+            ctx.stroke();
+            ctx.restore();
+        };
+    };
+
+    init();
+
+    function init() {
+        // Init canvas
+        canvas = document.getElementById("canvas");
+        w = canvas.width;
+        h = canvas.height;
+
+        ctx = canvas.getContext("2d");
+        ctx.lineWidth = 0.05;
+
+        // Init p2.js
+        world = new p2.World({gravity:[0,0]});
+        world.frictionGravity = 1;
+        world.applyDamping = true;
+    }
+
+    function addPlayer(id,x,y) {
+        var player = new Player(id, x,y);
+        world.addBody(player.circleBody);
+        players.push(player);
+    }
+
+    window.addEventListener("keypress", keyPressed);
+    window.addEventListener("keyup", keyUp);
+
+    function keyPressed(event) {
+        if(players[mainPlayerId]) {
+            mainPlayer = players[mainPlayerId];
+            if (event.keyCode == 97) { //A
+                mainPlayer.input.a = true;
+            }
+            if (event.keyCode == 100) { // D
+                mainPlayer.input.d = true;
+            }
+            if (event.keyCode == 119) { //W
+                mainPlayer.input.w = true;
+            }
+            if (event.keyCode == 115) { //S
+                mainPlayer.input.s = true;
+            }
+        }
+    }
+
+    function keyUp(event) {
+        if(players[mainPlayerId]) {
+            mainPlayer = players[mainPlayerId];
+            if (event.keyCode == 65) { //A
+                mainPlayer.input.a = false;
+            }
+            if (event.keyCode == 68) { // D
+                mainPlayer.input.d = false;
+            }
+            if (event.keyCode == 87) { //W
+                mainPlayer.input.w = false;
+            }
+            if (event.keyCode == 83) { //S
+                mainPlayer.input.s = false;
+            }   
+        }
+    }
+
+    setInterval(function() {
+        /*if (players[mainPlayerId]) {
+            if (players[mainPlayerId].input.w) {
+                console.log('eg');
+                players[mainPlayerId].circleBody.applyImpulse([0, players[mainPlayerId].force], players[mainPlayerId].circleBody.position);
+            }
+            if (players[mainPlayerId].input.s) {
+                players[mainPlayerId].circleBody.applyImpulse([0, -players[mainPlayerId].force],  players[mainPlayerId].circleBody.position);
+            }
+            if (players[mainPlayerId].input.a) {
+                players[mainPlayerId].circleBody.applyImpulse([-players[mainPlayerId].force, 0],  players[mainPlayerId].circleBody.position);
+            }
+            if (players[mainPlayerId].input.d) {
+                players[mainPlayerId].circleBody.applyImpulse([players[mainPlayerId].force, 0],  players[mainPlayerId].circleBody.position);
+            }*/
+
+            if( players[mainPlayerId]) {
+                var data = {
+                    id: players[mainPlayerId].id,
+                    input: players[mainPlayerId].input
+                }
+                socket.emit('input', data);
+            }
+       //}     
+    }, 1000/10);
+
+    function render() {
+        // Clear the canvas
+        ctx.clearRect(0, 0, w, h);
+
+        // Transform the canvas
+        // Note that we need to flip the y axis since Canvas pixel coordinates
+        // goes from top to bottom, while physics does the opposite.
+        ctx.save();
+        ctx.translate(w / 2, h / 2); // Translate to the center
+        ctx.scale(30, -30); // Zoom in and flip y axis
+
+        // Draw all bodies
+        for(var i=0; i<players.length; i++) {
+
+            players[i].draw();
+        }
+
+        // Restore transform
+        ctx.restore();
+    }
+
+    var fixedTimeStep = 1 / 60, maxSubSteps = 10, lastTimeMilliseconds;
+    setInterval(function() {
+        for(var i=0; i<players.length; i++) {
+            players[i].updateState(.2);
+        }
+        world.step(1/60,1000/60,10);
+    },1000/60);
+
+    draw();
+
+    function draw() {
+        requestAnimationFrame(draw);
+        render();
+    }
+    
+
+    // =========================================================================
+    // Network code
+    // =========================================================================
+
+    var socket = io.connect();
+
+    tryConnect();
+
+    function tryConnect() {
+        if(socket.emit('connect', null)) {
+            console.log('Successfully connected.');
+            connected();
+        } else {
+            setTimeout(function() {
+                console.log('Attempting to connect another time..');
+                tryConnect();
+            },2000);    
+        }
+    }
+
+    function connected() {
+        getPlayers();
+        addMainPlayer();
+        addNewPlayer();
+        receiveState();
+    }
+
+    function getPlayers() {
+        socket.emit('getPlayers', null);
+        socket.on('getPlayers', function(players) {
+            for(var i=0; i<players.length;i ++) {
+                addPlayer(players[i].id, players[i].position[0], players[i].position[1]);
+            } 
+        });
+    }
+
+    function addMainPlayer() {
+        socket.emit('addMainPlayer', null);
+        socket.on('addMainPlayer', function(player) {
+            mainPlayerId = player.id;
+            addPlayer(player.id, player.position[0], player.position[1]);
+        });
+    }
+
+    function addNewPlayer() {
+        socket.on('addNewPlayer', function(player) {
+            addPlayer(player.id, player.position[0], player.position[1]);
+        });
+    }
+
+    function receiveState() {
+        socket.on('state', function(playersData) {
+            for(var i=0; i<players.length; i++) {
+                players[i].circleBody.position = playersData[i].position;
+                players[i].circleBody.velocity = playersData[i].velocity;   
+            }
+        });
+    }
+
+    </script>
+</body>
+<script>

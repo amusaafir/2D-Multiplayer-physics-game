@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>p2.js Canvas Box example</title>
+    <meta charset="utf-8">
+    <script src="p2.js"></script>
+</head>
+
+<body>
+    <!-- The canvas, where we draw stuff -->
+    <canvas style="border: 1px solid black;" width="1280" height="720" id="myCanvas"></canvas>
+    <script>
+    var canvas, ctx, w, h,
+        world, boxBody, planeBody;
+
+    var players = [];
+
+    var Player = function(x,y) {
+        this.boxShape = new p2.Circle({
+            radius: 1
+        });
+        this.boxBody = new p2.Body({
+            mass: 1,
+            position: [x, y],
+            angularVelocity: 1
+        });
+        this.boxBody.addShape(this.boxShape);
+
+        this.updateState  = function(dt) {
+            this.boxBody.applyDamping(dt);
+        };
+
+        this.draw = function() {
+            ctx.beginPath();
+            var x = this.boxBody.position[0],
+                y = this.boxBody.position[1];
+            ctx.save();
+            ctx.translate(x, y); // Translate to the center of the box
+            ctx.rotate(this.boxBody.angle); // Rotate to the box body frame
+            ctx.arc(0, 0, 1, 0, 2 * Math.PI);
+            ctx.stroke();
+            ctx.restore();
+        };
+    };
+
+    init();
+    animate();
+
+    function init() {
+        // Init canvas
+        canvas = document.getElementById("myCanvas");
+        w = canvas.width;
+        h = canvas.height;
+
+        ctx = canvas.getContext("2d");
+        ctx.lineWidth = 0.05;
+
+        // Init p2.js
+        world = new p2.World({gravity:[0,0]});
+        world.frictionGravity = 1;
+        world.applyDamping = true;
+
+        // Add a box
+        addPlayer(0,3);
+        addPlayer(0,0);
+        addPlayer(-2,2);
+        addPlayer(5,5);
+    }
+
+    function addPlayer(x,y) {
+        var player = new Player(x,y);
+        world.addBody(player.boxBody);
+        players.push(player);
+    }
+
+    var input = {
+        w: false,
+        a: false,
+        s: false,
+        d: false
+    };
+    window.addEventListener("keypress", keyPressed);
+    window.addEventListener("keyup", keyUp);
+
+    function keyPressed(event) {
+        if (event.keyCode == 97) { //A
+            input.a = true;
+        }
+        if (event.keyCode == 100) { // D
+            input.d = true;
+        }
+        if (event.keyCode == 119) { //W
+            input.w = true;
+        }
+        if (event.keyCode == 115) { //S
+            input.s = true;
+        }
+    }
+
+    function keyUp(event) {
+        if (event.keyCode == 65) { //A
+            input.a = false;
+        }
+        if (event.keyCode == 68) { // D
+            input.d = false;
+        }
+        if (event.keyCode == 87) { //W
+            input.w = false;
+        }
+        if (event.keyCode == 83) { //S
+            input.s = false;
+        }
+    }
+
+    inputLoop();
+    var force = .1;
+
+    function inputLoop() {
+        if (players[0].boxBody) {
+            if (input.w) {
+                players[0].boxBody.applyImpulse([0, force], players[0].boxBody.position);
+            }
+            if (input.s) {
+                players[0].boxBody.applyImpulse([0, -force], players[0].boxBody.position);
+            }
+            if (input.a) {
+                players[0].boxBody.applyImpulse([-force, 0], players[0].boxBody.position);
+            }
+            if (input.d) {
+                players[0].boxBody.applyImpulse([force, 0], players[0].boxBody.position);
+            }
+        }
+
+        setTimeout(function() {
+            inputLoop();
+        }, 1000/60);
+    }
+
+    function render() {
+        // Clear the canvas
+        ctx.clearRect(0, 0, w, h);
+
+        // Transform the canvas
+        // Note that we need to flip the y axis since Canvas pixel coordinates
+        // goes from top to bottom, while physics does the opposite.
+        ctx.save();
+        ctx.translate(w / 2, h / 2); // Translate to the center
+        ctx.scale(50, -50); // Zoom in and flip y axis
+
+        // Draw all bodies
+        for(var i=0; i<players.length; i++) {
+            players[i].draw();
+        }
+
+        // Restore transform
+        ctx.restore();
+    }
+
+    // Animation loop
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // Move physics bodies forward in time
+        world.step(1 / 60, 1000 / 60, 1);
+        for(var i=0; i<players.length; i++) {
+            players[i].updateState(0.2);
+        }
+
+        // Render scene
+        render();
+    }
+    </script>
+</body>
+
+</html>
