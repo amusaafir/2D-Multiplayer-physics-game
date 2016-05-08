@@ -27,7 +27,7 @@
 
     var Player = function(id, x,y) {
         this.id = id;
-        this.force = .4;
+        this.force = .05;
         this.circleShape = new p2.Circle({
             radius: 1
         });
@@ -54,6 +54,19 @@
                 y = this.circleBody.position[1];
             ctx.save();
             ctx.translate(x, y); // Translate to the center of the circle
+            ctx.rotate(this.circleBody.angle); // Rotate to the circle body frame
+            ctx.arc(0, 0, 1, 0, 2 * Math.PI);
+            ctx.stroke();
+            ctx.restore();
+        };
+
+        this.shadowX = x;
+        this.shadowY = y;
+
+        this.drawShadow = function() {
+            ctx.beginPath();
+            ctx.save();
+            ctx.translate(this.shadowX, this.shadowY); // Translate to the center of the circle
             ctx.rotate(this.circleBody.angle); // Rotate to the circle body frame
             ctx.arc(0, 0, 1, 0, 2 * Math.PI);
             ctx.stroke();
@@ -124,29 +137,13 @@
     }
 
     setInterval(function() {
-        /*if (players[mainPlayerId]) {
-            if (players[mainPlayerId].input.w) {
-                console.log('eg');
-                players[mainPlayerId].circleBody.applyImpulse([0, players[mainPlayerId].force], players[mainPlayerId].circleBody.position);
+        if (players[mainPlayerId]) {
+            var data = {
+                id: players[mainPlayerId].id,
+                input: players[mainPlayerId].input
             }
-            if (players[mainPlayerId].input.s) {
-                players[mainPlayerId].circleBody.applyImpulse([0, -players[mainPlayerId].force],  players[mainPlayerId].circleBody.position);
-            }
-            if (players[mainPlayerId].input.a) {
-                players[mainPlayerId].circleBody.applyImpulse([-players[mainPlayerId].force, 0],  players[mainPlayerId].circleBody.position);
-            }
-            if (players[mainPlayerId].input.d) {
-                players[mainPlayerId].circleBody.applyImpulse([players[mainPlayerId].force, 0],  players[mainPlayerId].circleBody.position);
-            }*/
-
-            if( players[mainPlayerId]) {
-                var data = {
-                    id: players[mainPlayerId].id,
-                    input: players[mainPlayerId].input
-                }
-                socket.emit('input', data);
-            }
-       //}     
+            socket.emit('input', data);
+       }     
     }, 1000/10);
 
     function render() {
@@ -162,18 +159,34 @@
 
         // Draw all bodies
         for(var i=0; i<players.length; i++) {
-
             players[i].draw();
+            players[i].drawShadow();
         }
 
         // Restore transform
         ctx.restore();
     }
-
+    var aCount = 0;
     var fixedTimeStep = 1 / 60, maxSubSteps = 10, lastTimeMilliseconds;
     setInterval(function() {
-        for(var i=0; i<players.length; i++) {
-            players[i].updateState(.2);
+        if(players[mainPlayerId]) {
+            if (players[mainPlayerId].input.w) {
+                players[mainPlayerId].circleBody.applyImpulse([0, players[mainPlayerId].force], players[mainPlayerId].circleBody.position);
+            }
+            if (players[mainPlayerId].input.s) {
+                players[mainPlayerId].circleBody.applyImpulse([0, -players[mainPlayerId].force],  players[mainPlayerId].circleBody.position);
+            }
+            if (players[mainPlayerId].input.a) {
+                aCount++;
+                players[mainPlayerId].circleBody.applyImpulse([-players[mainPlayerId].force, 0],  players[mainPlayerId].circleBody.position);
+                console.log(aCount);
+            }
+            if (players[mainPlayerId].input.d) {
+                players[mainPlayerId].circleBody.applyImpulse([players[mainPlayerId].force, 0],  players[mainPlayerId].circleBody.position);
+            }
+            for(var i=0; i<players.length; i++) {
+                players[i].updateState(.2);
+            }
         }
         world.step(1/60,1000/60,10);
     },1000/60);
@@ -239,8 +252,10 @@
     function receiveState() {
         socket.on('state', function(playersData) {
             for(var i=0; i<players.length; i++) {
-                players[i].circleBody.position = playersData[i].position;
-                players[i].circleBody.velocity = playersData[i].velocity;   
+                //players[i].circleBody.position = playersData[i].position;
+                //players[i].circleBody.velocity = playersData[i].velocity;
+                players[i].shadowX = playersData[i].position[0]
+                players[i].shadowY = playersData[i].position[1];   
             }
         });
     }

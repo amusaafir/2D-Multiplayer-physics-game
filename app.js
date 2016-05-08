@@ -65,7 +65,7 @@ function init() {
 
 function Player(id, position) {
     this.id = id;
-    this.force = .4;
+    this.force = .05;
     this.circleShape = new p2.Circle({
         radius: 1
     });
@@ -104,24 +104,8 @@ function Position(x, y) {
 }
 
 setInterval(function() {
-    for(var id=0; id<players.length; id++) {
-    if (players[id]) {
-        if (players[id].input.w) {
-            players[id].circleBody.applyImpulse([0, players[id].force], players[id].circleBody.position);
-        }
-        if (players[id].input.s) {
-            players[id].circleBody.applyImpulse([0, -players[id].force],  players[id].circleBody.position);
-        }
-        if (players[id].input.a) {
-            players[id].circleBody.applyImpulse([-players[id].force, 0],  players[id].circleBody.position);
-        }
-        if (players[id].input.d) {
-            players[id].circleBody.applyImpulse([players[id].force, 0],  players[id].circleBody.position);
-        }
-    }
-}
     sendState();
-},1000/10);
+},500);
 
 function sendState() {
     var data = [];
@@ -135,10 +119,28 @@ function sendState() {
     }
 }
 
+var aCount = 0;
 var fixedTimeStep = 1 / 60, maxSubSteps = 10, lastTimeMilliseconds;
 setInterval(function() {
-    for(var i=0; i<players.length; i++) {
-        players[i].updateState(.2);
+
+    for(var id=0; id<players.length; id++) {
+        if (players[id]) {
+            if (players[id].input.w) {
+                players[id].circleBody.applyImpulse([0, players[id].force], players[id].circleBody.position);
+            }
+            if (players[id].input.s) {
+                players[id].circleBody.applyImpulse([0, -players[id].force],  players[id].circleBody.position);
+            }
+            if (players[id].input.a) {
+                aCount++;
+                players[id].circleBody.applyImpulse([-players[id].force, 0],  players[id].circleBody.position);
+                console.log(aCount);
+            }
+            if (players[id].input.d) {
+                players[id].circleBody.applyImpulse([players[id].force, 0],  players[id].circleBody.position);
+            }
+        }
+        players[id].updateState(.2);
     }
     world.step(1/60,1000/60,10);
 },1000/60);
