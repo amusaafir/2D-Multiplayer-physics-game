@@ -40,10 +40,23 @@ io.sockets.on('connect', function(socket) {
 
     socket.on('input', function(player) {
         if(players[player.id]) {
-            players[player.id].input = player.input;
+           // players[player.id].input = player.input;
+        }
+    });
+
+     socket.on('impulse', function(data) {
+        request= true;
+                currentId = data.id;
+                currentX = data.x;
+                currentY = data.y;
+        //players[data.id].circleBody.applyImpulse([data.x, data.y],  players[data.id].circleBody.position);
+        if(io) {
+            io.emit('impulseState', data);
         }
     });
 });
+
+
 
 var players = [];
 var positions = [];
@@ -52,8 +65,8 @@ var world;
 init();
 
 function init() {
-    for(var x=-10; x<10; x+=2 ) {
-        for(var y=-8; y<8; y+=2) {
+    for(var x=-10; x<10; x+=3 ) {
+        for(var y=-8; y<8; y+=3) {
             positions.push(new Position(x,y));
         }
     }
@@ -142,5 +155,27 @@ setInterval(function() {
         }
         players[id].updateState(.2);
     }
-    world.step(1/60,1000/60,10);
+
+    var stepTime;
+    var now = new Date().getTime();
+        if(!lastTimeMilliseconds) {
+            stepTime = 1000/60;
+        } else {
+             stepTime = now - lastTimeMilliseconds;
+        }
+    world.step(1/60,stepTime,1);
+    lastTimeMilliseconds =  now;
 },1000/60);
+
+  var currentId;
+    var currentX;
+    var currentY;
+    var request = false;
+
+world.on("postStep", function(){
+        if(request) {
+            players[currentId].circleBody.applyForce([currentX, currentY],  players[currentId].circleBody.position);
+            request = false;
+        }
+        
+    });

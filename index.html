@@ -56,6 +56,8 @@
             ctx.translate(x, y); // Translate to the center of the circle
             ctx.rotate(this.circleBody.angle); // Rotate to the circle body frame
             ctx.arc(0, 0, 1, 0, 2 * Math.PI);
+            ctx.fillStyle = 'orange';
+            ctx.fill();
             ctx.stroke();
             ctx.restore();
         };
@@ -68,6 +70,7 @@
             ctx.save();
             ctx.translate(this.shadowX, this.shadowY); // Translate to the center of the circle
             ctx.rotate(this.circleBody.angle); // Rotate to the circle body frame
+            
             ctx.arc(0, 0, 1, 0, 2 * Math.PI);
             ctx.stroke();
             ctx.restore();
@@ -160,7 +163,7 @@
         // Draw all bodies
         for(var i=0; i<players.length; i++) {
             players[i].draw();
-            players[i].drawShadow();
+            //players[i].drawShadow();
         }
 
         // Restore transform
@@ -168,6 +171,7 @@
     }
     var aCount = 0;
     var fixedTimeStep = 1 / 60, maxSubSteps = 10, lastTimeMilliseconds;
+
     setInterval(function() {
         if(players[mainPlayerId]) {
             if (players[mainPlayerId].input.w) {
@@ -188,7 +192,15 @@
                 players[i].updateState(.2);
             }
         }
-        world.step(1/60,1000/60,10);
+        var stepTime;
+    var now = new Date().getTime();
+        if(!lastTimeMilliseconds) {
+            stepTime = 1000/60;
+        } else {
+             stepTime = now - lastTimeMilliseconds;
+        }
+    world.step(1/60,stepTime,1);
+    lastTimeMilliseconds =  now;
     },1000/60);
 
     draw();
@@ -224,6 +236,7 @@
         addMainPlayer();
         addNewPlayer();
         receiveState();
+        receiveImpulseState();
     }
 
     function getPlayers() {
@@ -258,6 +271,68 @@
                 players[i].shadowY = playersData[i].position[1];   
             }
         });
+    }
+
+    function trajectory(x, y) {
+       // applyImpulse(mainPlayerId,x,y);
+                request= true;
+                currentId = mainPlayerId;
+                currentX = x;
+                currentY = y;
+        socket.emit('impulse', {
+            id: mainPlayerId,
+            x: x,
+            y: y
+        });
+    }
+
+    function receiveImpulseState() {
+        socket.on('impulseState', function(data) {
+            console.log('wtf');
+            if(data.id!=mainPlayerId) {
+                console.log('yea');
+                request= true;
+                currentId = data.id;
+                currentX = data.x;
+                currentY = data.y;
+                //applyImpulse(data.id, data.x, data.y);
+            }
+            
+        });
+    }
+
+    function applyImpulse(id, x,y) {
+        players[id].circleBody.applyImpulse([x, y],  players[id].circleBody.position);
+    }
+
+    var currentId;
+    var currentX;
+    var currentY;
+    var request = false;
+
+    world.on("postStep", function(){
+        if(request) {
+            players[currentId].circleBody.applyForce([currentX, currentY],  players[currentId].circleBody.position);
+            request = false;
+        }
+        
+    });
+
+    function syncWithShadows() {
+        for(var i=0; i<players.length; i++) {
+            players[i].circleBody.position = [players[i].shadowX, players[i].shadowY];
+        }
+    }
+
+    function areTheyInSync() {
+        for(var i=0; i<players.length; i++) {
+            if(players[i].circleBody.position[0] != players[i].shadowX) {
+               console.log('X nog equal for ' + i + ', client: ' + players[i].circleBody.position[0] + '; server ' + players[i].shadowX);
+            }
+            if(players[i].circleBody.position[1] != players[i].shadowY) {
+                console.log('Y nog equal for ' + i + ', client: ' + players[i].circleBody.position[1] + '; server ' + players[i].shadowY);
+            }
+        }
     }
 
     </script>
