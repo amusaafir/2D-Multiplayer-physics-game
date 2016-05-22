@@ -24,10 +24,17 @@ io.sockets.on('connect', function(socket) {
 
     socket.on('getPlayers', function() {
         var data = [];
-        for(var i=0; i<players.length; i++) {
+        for (var i = 0; i < players.length; i++) {
             data.push(players[i].getClientDetails());
         }
         socket.emit('getPlayers', data);
+    });
+
+    socket.on('getWorldDetails', function() {
+        var data = {
+            time: world.time
+        };
+        socket.emit('getWorldDetails', data);
     });
 
     socket.on('addMainPlayer', function() {
@@ -38,19 +45,13 @@ io.sockets.on('connect', function(socket) {
         socket.broadcast.emit('addNewPlayer', player.getClientDetails());
     });
 
-    socket.on('input', function(player) {
-        if(players[player.id]) {
-           // players[player.id].input = player.input;
-        }
-    });
+    socket.on('impulse', function(data) {
+        currentId = data.id;
+        currentX = data.x;
+        currentY = data.y;
+        request = true;
 
-     socket.on('impulse', function(data) {
-        request= true;
-                currentId = data.id;
-                currentX = data.x;
-                currentY = data.y;
-        //players[data.id].circleBody.applyImpulse([data.x, data.y],  players[data.id].circleBody.position);
-        if(io) {
+        if (io) {
             io.emit('impulseState', data);
         }
     });
@@ -65,13 +66,13 @@ var world;
 init();
 
 function init() {
-    for(var x=-10; x<10; x+=3 ) {
-        for(var y=-8; y<8; y+=3) {
-            positions.push(new Position(x,y));
+    for (var x = -10; x < 10; x += 3) {
+        for (var y = -8; y < 8; y += 3) {
+            positions.push(new Position(x, y));
         }
     }
-    
-    world = new p2.World({gravity:[0,0]});
+
+    world = new p2.World({ gravity: [0, 0] });
     world.frictionGravity = 1;
     world.applyDamping = true;
 }
@@ -80,13 +81,14 @@ function Player(id, position) {
     this.id = id;
     this.force = .05;
     this.circleShape = new p2.Circle({
-        radius: 1
+        radius: 1,
     });
     this.circleBody = new p2.Body({
         mass: 1,
         position: [position.x, position.y],
         angularVelocity: 1
     });
+    this.circleBody.damping = .8;
     this.circleBody.addShape(this.circleShape);
 
     this.input = {
@@ -97,10 +99,6 @@ function Player(id, position) {
     };
 
     world.addBody(this.circleBody);
-
-    this.updateState = function(dt) {
-        this.circleBody.applyDamping(dt);
-    };
 
     this.getClientDetails = function() {
         return {
@@ -118,15 +116,15 @@ function Position(x, y) {
 
 setInterval(function() {
     sendState();
-},500);
+}, 500);
 
 function sendState() {
     var data = [];
-    for(var i=0; i<players.length; i++) {
+    for (var i = 0; i < players.length; i++) {
         data.push(players[i].getClientDetails());
     }
-    if(io) {
-        if(io) {
+    if (io) {
+        if (io) {
             io.emit('state', data);
         }
     }
@@ -134,48 +132,19 @@ function sendState() {
 
 var aCount = 0;
 var fixedTimeStep = 1 / 60, maxSubSteps = 10, lastTimeMilliseconds;
+
 setInterval(function() {
+    world.step(1 / 60);
+}, 1000 / 60);
 
-    for(var id=0; id<players.length; id++) {
-        if (players[id]) {
-            if (players[id].input.w) {
-                players[id].circleBody.applyImpulse([0, players[id].force], players[id].circleBody.position);
-            }
-            if (players[id].input.s) {
-                players[id].circleBody.applyImpulse([0, -players[id].force],  players[id].circleBody.position);
-            }
-            if (players[id].input.a) {
-                aCount++;
-                players[id].circleBody.applyImpulse([-players[id].force, 0],  players[id].circleBody.position);
-                console.log(aCount);
-            }
-            if (players[id].input.d) {
-                players[id].circleBody.applyImpulse([players[id].force, 0],  players[id].circleBody.position);
-            }
-        }
-        players[id].updateState(.2);
+var currentId;
+var currentX;
+var currentY;
+var request = false;
+
+world.on("postStep", function() {
+    if (request) {
+        players[currentId].circleBody.applyForce([currentX, currentY], players[currentId].circleBody.position);
+        request = false;
     }
-
-    var stepTime;
-    var now = new Date().getTime();
-        if(!lastTimeMilliseconds) {
-            stepTime = 1000/60;
-        } else {
-             stepTime = now - lastTimeMilliseconds;
-        }
-    world.step(1/60,stepTime,1);
-    lastTimeMilliseconds =  now;
-},1000/60);
-
-  var currentId;
-    var currentX;
-    var currentY;
-    var request = false;
-
-world.on("postStep", function(){
-        if(request) {
-            players[currentId].circleBody.applyForce([currentX, currentY],  players[currentId].circleBody.position);
-            request = false;
-        }
-        
-    });
+});

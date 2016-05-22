@@ -29,23 +29,20 @@
         this.id = id;
         this.force = .05;
         this.circleShape = new p2.Circle({
-            radius: 1
+            radius: 1,
         });
         this.circleBody = new p2.Body({
             mass: 1,
             position: [x, y],
             angularVelocity: 1
         });
+        this.circleBody.damping = .8;
         this.circleBody.addShape(this.circleShape);
         this.input = {
             w: false,
             a: false,
             s: false,
             d: false
-        };
-
-        this.updateState  = function(dt) {
-            this.circleBody.applyDamping(dt);
         };
 
         this.draw = function() {
@@ -152,10 +149,6 @@
     function render() {
         // Clear the canvas
         ctx.clearRect(0, 0, w, h);
-
-        // Transform the canvas
-        // Note that we need to flip the y axis since Canvas pixel coordinates
-        // goes from top to bottom, while physics does the opposite.
         ctx.save();
         ctx.translate(w / 2, h / 2); // Translate to the center
         ctx.scale(30, -30); // Zoom in and flip y axis
@@ -163,7 +156,7 @@
         // Draw all bodies
         for(var i=0; i<players.length; i++) {
             players[i].draw();
-            //players[i].drawShadow();
+            players[i].drawShadow();
         }
 
         // Restore transform
@@ -188,19 +181,9 @@
             if (players[mainPlayerId].input.d) {
                 players[mainPlayerId].circleBody.applyImpulse([players[mainPlayerId].force, 0],  players[mainPlayerId].circleBody.position);
             }
-            for(var i=0; i<players.length; i++) {
-                players[i].updateState(.2);
-            }
         }
-        var stepTime;
-    var now = new Date().getTime();
-        if(!lastTimeMilliseconds) {
-            stepTime = 1000/60;
-        } else {
-             stepTime = now - lastTimeMilliseconds;
-        }
-    world.step(1/60,stepTime,1);
-    lastTimeMilliseconds =  now;
+
+    world.step(1/60);
     },1000/60);
 
     draw();
@@ -233,6 +216,7 @@
 
     function connected() {
         getPlayers();
+        getWorldDetails();
         addMainPlayer();
         addNewPlayer();
         receiveState();
@@ -245,6 +229,13 @@
             for(var i=0; i<players.length;i ++) {
                 addPlayer(players[i].id, players[i].position[0], players[i].position[1]);
             } 
+        });
+    }
+
+    function getWorldDetails() {
+        socket.emit('getWorldDetails', null);
+        socket.on('getWorldDetails', function(data) {
+            world.time = data.time;
         });
     }
 
@@ -274,11 +265,11 @@
     }
 
     function trajectory(x, y) {
-       // applyImpulse(mainPlayerId,x,y);
-                request= true;
-                currentId = mainPlayerId;
-                currentX = x;
-                currentY = y;
+        currentId = mainPlayerId;
+        currentX = x;
+        currentY = y;
+        request = true;
+
         socket.emit('impulse', {
             id: mainPlayerId,
             x: x,
@@ -288,16 +279,12 @@
 
     function receiveImpulseState() {
         socket.on('impulseState', function(data) {
-            console.log('wtf');
-            if(data.id!=mainPlayerId) {
-                console.log('yea');
-                request= true;
+            if(data.id != mainPlayerId) {
                 currentId = data.id;
                 currentX = data.x;
                 currentY = data.y;
-                //applyImpulse(data.id, data.x, data.y);
+                request = true;
             }
-            
         });
     }
 
@@ -332,6 +319,15 @@
             if(players[i].circleBody.position[1] != players[i].shadowY) {
                 console.log('Y nog equal for ' + i + ', client: ' + players[i].circleBody.position[1] + '; server ' + players[i].shadowY);
             }
+        }
+    }
+
+   function print() {
+        for(var i=0; i<players.length; i++) {
+               console.log('X nog equal for ' + i + ', client: ' + players[i].circleBody.position[0] + '; server ' + players[i].shadowX);
+            
+                console.log('Y nog equal for ' + i + ', client: ' + players[i].circleBody.position[1] + '; server ' + players[i].shadowY);
+            
         }
     }
 
