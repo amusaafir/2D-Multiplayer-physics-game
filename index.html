@@ -25,9 +25,8 @@
     var players = [];
     var mainPlayerId;
 
-    var Player = function(id, x,y) {
+    var Player = function(id, x, y) {
         this.id = id;
-        this.force = .05;
         this.circleShape = new p2.Circle({
             radius: 1,
         });
@@ -38,13 +37,7 @@
         });
         this.circleBody.damping = .8;
         this.circleBody.addShape(this.circleShape);
-        this.input = {
-            w: false,
-            a: false,
-            s: false,
-            d: false
-        };
-
+        
         this.draw = function() {
             ctx.beginPath();
             var x = this.circleBody.position[0],
@@ -97,55 +90,6 @@
         players.push(player);
     }
 
-    window.addEventListener("keypress", keyPressed);
-    window.addEventListener("keyup", keyUp);
-
-    function keyPressed(event) {
-        if(players[mainPlayerId]) {
-            mainPlayer = players[mainPlayerId];
-            if (event.keyCode == 97) { //A
-                mainPlayer.input.a = true;
-            }
-            if (event.keyCode == 100) { // D
-                mainPlayer.input.d = true;
-            }
-            if (event.keyCode == 119) { //W
-                mainPlayer.input.w = true;
-            }
-            if (event.keyCode == 115) { //S
-                mainPlayer.input.s = true;
-            }
-        }
-    }
-
-    function keyUp(event) {
-        if(players[mainPlayerId]) {
-            mainPlayer = players[mainPlayerId];
-            if (event.keyCode == 65) { //A
-                mainPlayer.input.a = false;
-            }
-            if (event.keyCode == 68) { // D
-                mainPlayer.input.d = false;
-            }
-            if (event.keyCode == 87) { //W
-                mainPlayer.input.w = false;
-            }
-            if (event.keyCode == 83) { //S
-                mainPlayer.input.s = false;
-            }   
-        }
-    }
-
-    setInterval(function() {
-        if (players[mainPlayerId]) {
-            var data = {
-                id: players[mainPlayerId].id,
-                input: players[mainPlayerId].input
-            }
-            socket.emit('input', data);
-       }     
-    }, 1000/10);
-
     function render() {
         // Clear the canvas
         ctx.clearRect(0, 0, w, h);
@@ -166,24 +110,7 @@
     var fixedTimeStep = 1 / 60, maxSubSteps = 10, lastTimeMilliseconds;
 
     setInterval(function() {
-        if(players[mainPlayerId]) {
-            if (players[mainPlayerId].input.w) {
-                players[mainPlayerId].circleBody.applyImpulse([0, players[mainPlayerId].force], players[mainPlayerId].circleBody.position);
-            }
-            if (players[mainPlayerId].input.s) {
-                players[mainPlayerId].circleBody.applyImpulse([0, -players[mainPlayerId].force],  players[mainPlayerId].circleBody.position);
-            }
-            if (players[mainPlayerId].input.a) {
-                aCount++;
-                players[mainPlayerId].circleBody.applyImpulse([-players[mainPlayerId].force, 0],  players[mainPlayerId].circleBody.position);
-                console.log(aCount);
-            }
-            if (players[mainPlayerId].input.d) {
-                players[mainPlayerId].circleBody.applyImpulse([players[mainPlayerId].force, 0],  players[mainPlayerId].circleBody.position);
-            }
-        }
-
-    world.step(1/60);
+        world.step(1/60);
     },1000/60);
 
     draw();
@@ -225,9 +152,11 @@
 
     function getPlayers() {
         socket.emit('getPlayers', null);
-        socket.on('getPlayers', function(players) {
-            for(var i=0; i<players.length;i ++) {
-                addPlayer(players[i].id, players[i].position[0], players[i].position[1]);
+        socket.on('getPlayers', function(playersData) {
+            for(var i=0; i<playersData.length;i++) {
+                addPlayer(playersData[i].id, playersData[i].position[0], playersData[i].position[1]);
+                players[i].circleBody.velocity = playersData[i].velocity;
+                players[i].circleBody.angularVelocity = playersData[i].angularVelocity;
             } 
         });
     }

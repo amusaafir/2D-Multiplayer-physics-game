@@ -79,7 +79,6 @@ function init() {
 
 function Player(id, position) {
     this.id = id;
-    this.force = .05;
     this.circleShape = new p2.Circle({
         radius: 1,
     });
@@ -90,21 +89,14 @@ function Player(id, position) {
     });
     this.circleBody.damping = .8;
     this.circleBody.addShape(this.circleShape);
-
-    this.input = {
-        w: false,
-        a: false,
-        s: false,
-        d: false
-    };
-
     world.addBody(this.circleBody);
 
     this.getClientDetails = function() {
         return {
             id: this.id,
             position: this.circleBody.position,
-            velocity: this.circleBody.velocity
+            velocity: this.circleBody.velocity,
+            angularVelocity: this.circleBody.angularVelocity
         };
     };
 }
