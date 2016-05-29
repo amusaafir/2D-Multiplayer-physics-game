@@ -8,6 +8,7 @@ var p2 = require('p2');
 server.listen(3000);
 
 app.use('/node_modules/p2/build/p2.js', express.static(path.join(__dirname, '/node_modules/p2/build/p2.js')));
+app.use('/node_modules/socket.io/node_modules/socket.io-client/socket.io.js', express.static(path.join(__dirname, '/node_modules/socket.io/node_modules/socket.io-client/socket.io.js')));
 
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/index.html');
