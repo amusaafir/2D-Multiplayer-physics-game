@@ -17,9 +17,9 @@ Renderer.prototype.init = function() {
 
 Renderer.prototype.render = function() {
     // Clear the canvas
-    this.ctx.clearRect(0, 0, w, h);
+    this.ctx.clearRect(0, 0, this.w, this.h);
     this.ctx.save();
-    this.ctx.translate(w / 2, h / 2); // Translate to the center
+    this.ctx.translate(this.w / 2, this.h / 2); // Translate to the center
     this.ctx.scale(30, -30); // Zoom in and flip y axis
 
     // Draw all bodies

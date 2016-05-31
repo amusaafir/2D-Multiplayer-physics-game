@@ -1,4 +1,4 @@
-var Player = function(id, x, y) {
+var Player = function(id, x, y, renderer) {
     this.id = id;
     this.circleShape = new p2.Circle({
         radius: 1,
@@ -12,28 +12,29 @@ var Player = function(id, x, y) {
     this.circleBody.addShape(this.circleShape);
     this.shadowX = x;
     this.shadowY = y;
+    this.renderer = renderer;
 };
 
 Player.prototype.draw = function() {
-    ctx.beginPath();
+    this.renderer.ctx.beginPath();
     var x = this.circleBody.position[0],
         y = this.circleBody.position[1];
-    ctx.save();
-    ctx.translate(x, y); // Translate to the center of the circle
-    ctx.rotate(this.circleBody.angle); // Rotate to the circle body frame
-    ctx.arc(0, 0, 1, 0, 2 * Math.PI);
-    ctx.fillStyle = 'orange';
-    ctx.fill();
-    ctx.stroke();
-    ctx.restore();
+    this.renderer.ctx.save();
+    this.renderer.ctx.translate(x, y); // Translate to the center of the circle
+    this.renderer.ctx.rotate(this.circleBody.angle); // Rotate to the circle body frame
+    this.renderer.ctx.arc(0, 0, 1, 0, 2 * Math.PI);
+    this.renderer.ctx.fillStyle = 'orange';
+    this.renderer.ctx.fill();
+    this.renderer.ctx.stroke();
+    this.renderer.ctx.restore();
 }; 
 
 Player.prototype.drawShadow = function() {
-    ctx.beginPath();
-    ctx.save();
-    ctx.translate(this.shadowX, this.shadowY);
-    ctx.rotate(this.circleBody.angle);
-    ctx.arc(0, 0, 1, 0, 2 * Math.PI);
-    ctx.stroke();
-    ctx.restore();
+    this.renderer.ctx.beginPath();
+    this.renderer.ctx.save();
+    this.renderer.ctx.translate(this.shadowX, this.shadowY);
+    this.renderer.ctx.rotate(this.circleBody.angle);
+    this.renderer.ctx.arc(0, 0, 1, 0, 2 * Math.PI);
+    this.renderer.ctx.stroke();
+    this.renderer.ctx.restore();
 };
