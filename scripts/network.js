@@ -1,4 +1,5 @@
-var Network = function() {
+var Network = function(game) {
+    this.game = game;
 	this.socket = io.connect();
 	this.tryConnect();
 };
@@ -25,40 +26,65 @@ Network.prototype.connected = function() {
 };
 
 Network.prototype.getPlayers = function() {
+    var self = this;
+
     this.socket.emit('getPlayers', null);
+
     this.socket.on('getPlayers', function(playersData) {
-	    console.log('getplayers!');
+	    for(var i=0; i<playersData.length;i++) {
+            self.game.addPlayer(playersData[i].id, playersData[i].position[0], playersData[i].position[1]);
+            self.game.players[i].circleBody.velocity = playersData[i].velocity;
+            self.game.players[i].circleBody.angularVelocity = playersData[i].angularVelocity;
+        } 
     });
 };
 
 Network.prototype.getWorldDetails = function() {
+    var self = this;
+
     this.socket.emit('getWorldDetails', null);
+    
     this.socket.on('getWorldDetails', function(data) {
-        console.log('world details!');
+        self.game.world.time = data.time;
     });
 };
 
 Network.prototype.addMainPlayer = function() {
+    var self = this;
+
     this.socket.emit('addMainPlayer', null);
+
     this.socket.on('addMainPlayer', function(player) {
-        console.log('addmainplayer!');
+        self.game.mainPlayerId = player.id;
+        self.game.addPlayer(player.id, player.position[0], player.position[1]);
     });
 };
 
 Network.prototype.addNewPlayer = function() {
+    var self = this;
+
     this.socket.on('addNewPlayer', function(player) {
-        console.log('add new player!');
+        self.game.addPlayer(player.id, player.position[0], player.position[1]);
     });
-}
+};
 
 Network.prototype.receiveState = function() {
+    var self = this;
+
     this.socket.on('state', function(playersData) {
-        console.log('receiveState');
+        for(var i=0; i<self.game.players.length; i++) {
+            //players[i].circleBody.position = playersData[i].position;
+            //players[i].circleBody.velocity = playersData[i].velocity;
+            self.game.players[i].shadowX = playersData[i].position[0]
+            self.game.players[i].shadowY = playersData[i].position[1];   
+        }
     });
 };
 
 Network.prototype.receiveImpulseState = function() {
+    var self = this;
+
     this.socket.on('impulseState', function(data) {
         console.log('receiveimpulsestate');
     });
-}
+};
