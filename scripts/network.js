@@ -85,6 +85,21 @@ Network.prototype.receiveImpulseState = function() {
     var self = this;
 
     this.socket.on('impulseState', function(data) {
-        console.log('receiveimpulsestate');
+        if(data.id != self.game.mainPlayerId) {
+            self.game.currentId = data.id;
+            self.game.currentX = data.x;
+            self.game.currentY = data.y;
+            self.game.request = true;
+        }
+    });
+};
+
+Network.prototype.setTrajectory = function(x, y) {
+    var self = this;
+
+    this.socket.emit('impulse', {
+        id: self.game.mainPlayerId,
+        x: x,
+        y: y
     });
 };

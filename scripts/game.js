@@ -1,9 +1,16 @@
 var Game = function() {
+	this.network = new Network(this);
 	this.mainPlayerId;
 	this.players = [];
 	this.world = new World();
 	this.renderer = new Renderer(this.players);
+	this.currentId;
+	this.currentX;
+	this.currentY;
+	this.request;
+
 	this.run();
+	this.postStep();
 	this.draw();
 };
 
@@ -16,12 +23,13 @@ Game.prototype.run = function() {
 
 Game.prototype.draw = function() {
 	var self = this;
+	
 	draw();
+	
 	function draw() {
 		requestAnimationFrame(draw);
     	self.renderer.render();
 	}
-    
 };
 
 Game.prototype.addPlayer = function(id, x, y) {
@@ -31,10 +39,21 @@ Game.prototype.addPlayer = function(id, x, y) {
 };
 
 Game.prototype.postStep = function() {
-	this.world.on("postStep", function() {
-        //if(request) {
-        //    players[currentId].circleBody.applyForce([currentX, currentY],  players[currentId].circleBody.position);
-        //    request = false;
-        //}
+	var self = this;
+
+	this.world.getWorld().on("postStep", function() {
+        if(self.request) {
+            self.players[self.mainPlayerId].circleBody.applyForce([self.currentX, self.currentY],  self.players[self.currentId].circleBody.position);
+            self.request = false;
+        }
     });
+};
+
+Game.prototype.trajectory = function(x, y) {
+	this.currentId = this.mainPlayerId;
+    this.currentX = x;
+    this.currentY = y;
+    this.request = true;
+
+    this.network.setTrajectory(x,y);
 };
