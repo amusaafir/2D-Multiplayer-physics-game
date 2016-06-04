@@ -1,3 +1,5 @@
+var game; // For direct access
+
 (function() {
-	var game = new Game();
+	game = new Game();
 })();

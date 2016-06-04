@@ -43,7 +43,7 @@ Game.prototype.postStep = function() {
 
 	this.world.getWorld().on("postStep", function() {
         if(self.request) {
-            self.players[self.mainPlayerId].circleBody.applyForce([self.currentX, self.currentY],  self.players[self.currentId].circleBody.position);
+            self.players[self.currentId].circleBody.applyForce([self.currentX, self.currentY],  self.players[self.currentId].circleBody.position);
             self.request = false;
         }
     });
