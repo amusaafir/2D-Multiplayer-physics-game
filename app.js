@@ -7,14 +7,20 @@ var p2 = require('p2');
 
 server.listen(3000);
 
+// Client and server data
 app.use('/node_modules/p2/build/p2.js', express.static(path.join(__dirname, '/node_modules/p2/build/p2.js')));
 app.use('/node_modules/socket.io/node_modules/socket.io-client/socket.io.js', express.static(path.join(__dirname, '/node_modules/socket.io/node_modules/socket.io-client/socket.io.js')));
-app.use('/client/loader.js', express.static(path.join(__dirname, '/client/loader.js')));
-app.use('/client/game.js', express.static(path.join(__dirname, '/client/game.js')));
-app.use('/client/renderer.js', express.static(path.join(__dirname, '/client/renderer.js')));
-app.use('/client/world.js', express.static(path.join(__dirname, '/client/world.js')));
-app.use('/client/network.js', express.static(path.join(__dirname, '/client/network.js')));
-app.use('/client/player.js', express.static(path.join(__dirname, '/client/player.js')));
+
+// Client data
+app.use('/client/Loader.js', express.static(path.join(__dirname, '/client/Loader.js')));
+app.use('/client/Game.js', express.static(path.join(__dirname, '/client/Game.js')));
+app.use('/client/Renderer.js', express.static(path.join(__dirname, '/client/Renderer.js')));
+app.use('/client/World.js', express.static(path.join(__dirname, '/client/World.js')));
+app.use('/client/Network.js', express.static(path.join(__dirname, '/client/Network.js')));
+app.use('/client/Player.js', express.static(path.join(__dirname, '/client/Player.js')));
+
+// Server data
+var message = require('./server/Loader');
 
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/index.html');
