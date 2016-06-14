@@ -57,3 +57,21 @@ Game.prototype.trajectory = function(x, y) {
 
     this.network.setTrajectory(x,y);
 };
+
+Game.prototype.areTheyInSync = function() {
+	for(var i=0; i<this.players.length; i++) {
+		if(this.players[i].circleBody.position[0] != this.players[i].shadowX) {
+			console.log('X not equal for ' + i + ', client: ' + this.players[i].circleBody.position[0] + '; server ' + this.players[i].shadowX);
+		}
+
+		if(this.players[i].circleBody.position[1] != this.players[i].shadowY) {
+			console.log('Y not equal for ' + i + ', client: ' + this.players[i].circleBody.position[1] + '; server ' + this.players[i].shadowY);
+		}
+	}
+};
+
+Game.prototype.syncPositions = function() {
+    for(var i=0; i<this.players.length; i++) {
+        this.players[i].circleBody.position = [this.players[i].shadowX, this.players[i].shadowY];
+   	}
+}
