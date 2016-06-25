@@ -1,51 +1,18 @@
+// TODO: Pass Game object to Network object. The game object should require the physics.
+
 var p2 = require('p2');
+var Network = require('./Network');
+var Player = require('./Player');
 
 function Server(io) {
 	console.log('Start the game server.');
 	this.io = io;
+	this.network = new Network(io, null, p2);
 	this.load();
-};
+}
 
 Server.prototype.load = function() {
-	var socketIdToPlayerId = {};
-
 	var self = this.io;
-	this.io.sockets.on('connect', function(socket) {
-	    self.sockets.connected[socket.id].emit('connected', true);
-
-	    socket.on('getPlayers', function() {
-	        var data = [];
-	        for (var i = 0; i < players.length; i++) {
-	            data.push(players[i].getClientDetails());
-	        }
-	        socket.emit('getPlayers', data);
-	    });
-
-	    socket.on('getWorldDetails', function() {
-	        var data = {
-	            time: world.time
-	        };
-	        socket.emit('getWorldDetails', data);
-	    });
-
-	    socket.on('addMainPlayer', function() {
-	        var id = players.length;
-	        var player = new Player(id, positions.pop());
-	        players.push(player);
-	        self.sockets.connected[socket.id].emit('addMainPlayer', player.getClientDetails());
-	        socket.broadcast.emit('addNewPlayer', player.getClientDetails());
-	    });
-
-	    socket.on('impulse', function(data) {
-	        currentId = data.id;
-	        currentX = data.x;
-	        currentY = data.y;
-	        request = true;
-	        if (self) {
-	           	self.emit('impulseState', data);
-	        }
-	    });
-	});
 
 	var players = [];
 	var positions = [];
@@ -63,30 +30,6 @@ Server.prototype.load = function() {
 	    world = new p2.World({ gravity: [0, 0] });
 	    world.frictionGravity = 1;
 	    world.applyDamping = true;
-	}
-
-	function Player(id, position) {
-	    this.id = id;
-	    this.circleShape = new p2.Circle({
-	        radius: 1,
-	    });
-	    this.circleBody = new p2.Body({
-	        mass: 1,
-	        position: [position.x, position.y],
-	        angularVelocity: 1
-	    });
-	    this.circleBody.damping = .8;
-	    this.circleBody.addShape(this.circleShape);
-	    world.addBody(this.circleBody);
-
-	    this.getClientDetails = function() {
-	        return {
-	            id: this.id,
-	            position: this.circleBody.position,
-	            velocity: this.circleBody.velocity,
-	            angularVelocity: this.circleBody.angularVelocity
-	        };
-	    };
 	}
 
 	function Position(x, y) {
