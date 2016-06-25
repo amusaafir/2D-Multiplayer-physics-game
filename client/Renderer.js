@@ -25,7 +25,7 @@ Renderer.prototype.render = function() {
     // Draw all bodies
     for(var i=0; i<this.players.length; i++) {
         this.players[i].draw();
-        this.players[i].drawShadow();
+        //this.players[i].drawShadow();
     }
 
     // Restore transform

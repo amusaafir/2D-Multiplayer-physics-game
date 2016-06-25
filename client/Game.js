@@ -1,14 +1,17 @@
+// TODO: Initialize properties in separate method
+
 var Game = function() {
 	this.network = new Network(this);
 	this.mainPlayerId;
 	this.players = [];
-	this.world = new World();
+	this.material = new Material();
+	this.world = new World(this.material);
 	this.renderer = new Renderer(this.players);
 	this.currentId;
 	this.currentX;
 	this.currentY;
 	this.request;
-
+	
 	this.run();
 	this.postStep();
 	this.draw();
@@ -33,7 +36,7 @@ Game.prototype.draw = function() {
 };
 
 Game.prototype.addPlayer = function(id, x, y) {
-	var player = new Player(id, x, y, this.renderer);
+	var player = new Player(id, x, y, this.renderer, this.material.getBallMaterial());
     this.world.getWorld().addBody(player.circleBody);
     this.players.push(player);
 };

@@ -1,12 +1,14 @@
-var Player = function(id, x, y, renderer) {
+var Player = function(id, x, y, renderer, material) {
+    console.log(material);
     this.id = id;
     this.circleShape = new p2.Circle({
         radius: 1,
+        material: material
     });
     this.circleBody = new p2.Body({
         mass: 1,
         position: [x, y],
-        angularVelocity: 1
+        angularVelocity: 1,
     });
     this.circleBody.damping = .8;
     this.circleBody.addShape(this.circleShape);
