@@ -1,7 +1,9 @@
 // Not tested yet, missing Game.js class
 // TODO: Abstract physics engine.
 
-function Player(id, position, p2) {
+var p2 = require('p2');
+
+function Player(id, position) {
 	this.id = id;
     this.circleShape = new p2.Circle({
         radius: 1,
@@ -13,7 +15,6 @@ function Player(id, position, p2) {
     });
     this.circleBody.damping = .8;
     this.circleBody.addShape(this.circleShape);
-    world.addBody(this.circleBody);
 }
 
 Player.prototype.getClientDetails = function() {
