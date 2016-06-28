@@ -1,4 +1,3 @@
-// Not tested yet, missing Game.js class
 // TODO: Abstract physics engine.
 
 var p2 = require('p2');

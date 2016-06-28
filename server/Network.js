@@ -1,8 +1,8 @@
-var Player = require('./Player');
+var Game = require('./Game');
 
-function Network(io, game) {
+function Network(io) {
 	this.io = io;
-	this.game = game;
+	this.game = new Game(io);
 	
 	this.connect();
 }
@@ -34,16 +34,12 @@ Network.prototype.connect = function() {
 
 	    // TODO: Add add player logic inside the game class
 	    socket.on('addMainPlayer', function() {
-	        var id = network.game.players.length;
-	        var player = new Player(id, network.game.positions.pop());
-	        network.game.world.addBody(player.circleBody);
-	        network.game.players.push(player);
+	        var player = network.game.addPlayer();
 	        self.sockets.connected[socket.id].emit('addMainPlayer', player.getClientDetails());
 	        socket.broadcast.emit('addNewPlayer', player.getClientDetails());
 	    });
 
 	    socket.on('impulse', function(data) {
-	    	console.log('impulse received');
 	       	network.game.currentId = data.id;
 	        network.game.currentX = data.x;
 	        network.game.currentY = data.y;

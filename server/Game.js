@@ -1,4 +1,5 @@
 var p2 = require('p2');
+var Player = require('./Player');
 var Position = require('./Position');
 
 function Game(io) {
@@ -66,6 +67,16 @@ Game.prototype.postStep = function() {
 	        self.request = false;
 	    }
 	});
+};
+
+Game.prototype.addPlayer = function() {
+	var id = this.players.length;
+	var startPosition = this.positions.pop();
+	var player = new Player(id, startPosition);
+	this.world.addBody(player.circleBody);
+	this.players.push(player);
+
+	return player;
 };
 
 module.exports = Game;

@@ -18,7 +18,7 @@ app.use('/client/World.js', express.static(path.join(__dirname, '/client/World.j
 app.use('/client/Network.js', express.static(path.join(__dirname, '/client/Network.js')));
 app.use('/client/Player.js', express.static(path.join(__dirname, '/client/Player.js')));
 
-// Server data
+// Server loader
 var GameServer = require('./server/Loader');
 
 var game = new GameServer(io); 
