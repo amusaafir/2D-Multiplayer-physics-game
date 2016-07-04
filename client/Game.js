@@ -3,7 +3,8 @@ var Game = function() {
 	this.mainPlayerId;
 	this.players = [];
 	this.world = new World();
-	this.renderer = new Renderer(this.players);
+	this.settings = new Settings();
+	this.renderer = new Renderer(this.players, this.settings);
 	this.currentId;
 	this.currentX;
 	this.currentY;

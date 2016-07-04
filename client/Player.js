@@ -10,6 +10,9 @@ var Player = function(id, x, y, renderer) {
     });
     this.circleBody.damping = .8;
     this.circleBody.addShape(this.circleShape);
+    this.circleBody.allowSleep = true;
+    this.circleBody.sleepSpeedLimit = 1;
+    this.circleBody.sleepTimeLimit = 1;
     this.shadowX = x;
     this.shadowY = y;
     this.renderer = renderer;
