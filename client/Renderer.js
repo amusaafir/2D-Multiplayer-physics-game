@@ -1,10 +1,11 @@
-var Renderer = function(players) {
+var Renderer = function(players, settings) {
     this.players = players;
     this.w; 
     this.h;
     this.canvas;
     this.ctx;
     this.init();
+    this.settings = settings;
 };
 
 Renderer.prototype.init = function() {
@@ -25,7 +26,9 @@ Renderer.prototype.render = function() {
     // Draw all bodies
     for(var i=0; i<this.players.length; i++) {
         this.players[i].draw();
-        this.players[i].drawShadow();
+        
+        if(this.settings.showServerPosition)
+            this.players[i].drawShadow();
     }
 
     // Restore transform

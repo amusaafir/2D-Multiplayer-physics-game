@@ -1,13 +1,13 @@
-var p2 = require('p2');
 var Player = require('./Player');
 var Position = require('./Position');
+var World = require('./World');
 
 function Game(io) {
 	this.io = io;
 
 	this.players = [];
 	this.positions = [];
-	this.world;
+	this.world = new World();
 
 	this.init();
 	this.run();
@@ -28,17 +28,13 @@ Game.prototype.init = function() {
             this.positions.push(new Position(x, y));
         }
     }
-
-    this.world = new p2.World({ gravity: [0, 0] });
-    this.world.frictionGravity = 1;
-    this.world.applyDamping = true;
 };
 
 Game.prototype.run = function() {
 	var self = this;
 	
 	setInterval(function() {
-    	self.world.step(1/60);
+    	self.world.world.step(1/60);
 	}, 1000/60);
 };
 
@@ -61,7 +57,7 @@ Game.prototype.sendState = function() {
 Game.prototype.postStep = function() {
 	var self = this;
 
-	this.world.on("postStep", function() {
+	this.world.world.on("postStep", function() {
 	    if (self.request) {
 	        self.players[self.currentId].circleBody.applyForce([self.currentX, self.currentY], self.players[self.currentId].circleBody.position);
 	        self.request = false;
@@ -73,7 +69,7 @@ Game.prototype.addPlayer = function() {
 	var id = this.players.length;
 	var startPosition = this.positions.pop();
 	var player = new Player(id, startPosition);
-	this.world.addBody(player.circleBody);
+	this.world.world.addBody(player.circleBody);
 	this.players.push(player);
 
 	return player;

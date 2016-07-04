@@ -12,6 +12,7 @@ app.use('/node_modules/socket.io/node_modules/socket.io-client/socket.io.js', ex
 
 // Client data
 app.use('/client/Loader.js', express.static(path.join(__dirname, '/client/Loader.js')));
+app.use('/client/Settings.js', express.static(path.join(__dirname, '/client/Settings.js')));
 app.use('/client/Game.js', express.static(path.join(__dirname, '/client/Game.js')));
 app.use('/client/Renderer.js', express.static(path.join(__dirname, '/client/Renderer.js')));
 app.use('/client/World.js', express.static(path.join(__dirname, '/client/World.js')));
