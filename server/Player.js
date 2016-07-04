@@ -3,7 +3,7 @@
 var p2 = require('p2');
 
 function Player(id, position, material) {
-	this.id = id;
+    this.id = id;
     this.circleShape = new p2.Circle({
         radius: 1,
         material: material
@@ -22,9 +22,9 @@ function Player(id, position, material) {
 }
 
 Player.prototype.getClientDetails = function() {
-	var self = this;
+    var self = this;
 
-	return {
+    return {
         id: self.id,
         position: self.circleBody.position,
         velocity: self.circleBody.velocity,

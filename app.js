@@ -23,7 +23,7 @@ app.use('/client/Player.js', express.static(path.join(__dirname, '/client/Player
 // Server loader
 var GameServer = require('./server/Loader');
 
-var game = new GameServer(io); 
+var game = new GameServer(io);
 
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/index.html');
