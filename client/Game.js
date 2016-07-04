@@ -2,7 +2,8 @@ var Game = function() {
 	this.network = new Network(this);
 	this.mainPlayerId;
 	this.players = [];
-	this.world = new World();
+	this.material = new Material();
+	this.world = new World(this.material);
 	this.settings = new Settings();
 	this.renderer = new Renderer(this.players, this.settings);
 	this.currentId;
@@ -17,6 +18,7 @@ var Game = function() {
 
 Game.prototype.run = function() {
 	var self = this;
+	
 	setInterval(function() {
     	self.world.getWorld().step(1/60);
 	}, 1000/60);
@@ -34,7 +36,7 @@ Game.prototype.draw = function() {
 };
 
 Game.prototype.addPlayer = function(id, x, y) {
-	var player = new Player(id, x, y, this.renderer);
+	var player = new Player(id, x, y, this.renderer, this.material.getBallMaterial());
     this.world.getWorld().addBody(player.circleBody);
     this.players.push(player);
 };
@@ -59,7 +61,7 @@ Game.prototype.trajectory = function(x, y) {
     this.network.setTrajectory(x,y);
 };
 
-Game.prototype.areTheyInSync = function() {
+Game.prototype.arePositionsSynced = function() {
 	for(var i=0; i<this.players.length; i++) {
 		if(this.players[i].circleBody.position[0] != this.players[i].shadowX) {
 			console.log('X not equal for ' + i + ', client: ' + this.players[i].circleBody.position[0] + '; server ' + this.players[i].shadowX);

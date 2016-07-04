@@ -2,10 +2,11 @@
 
 var p2 = require('p2');
 
-function Player(id, position) {
+function Player(id, position, material) {
 	this.id = id;
     this.circleShape = new p2.Circle({
         radius: 1,
+        material: material
     });
     this.circleBody = new p2.Body({
         mass: 1,

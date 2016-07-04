@@ -1,13 +1,15 @@
 var Player = require('./Player');
 var Position = require('./Position');
 var World = require('./World');
+var Material = require('./Material');
 
 function Game(io) {
 	this.io = io;
 
 	this.players = [];
 	this.positions = [];
-	this.world = new World();
+	this.material = new Material();
+	this.world = new World(this.material);
 
 	this.init();
 	this.run();
@@ -68,7 +70,7 @@ Game.prototype.postStep = function() {
 Game.prototype.addPlayer = function() {
 	var id = this.players.length;
 	var startPosition = this.positions.pop();
-	var player = new Player(id, startPosition);
+	var player = new Player(id, startPosition, this.material.getBallMaterial());
 	this.world.world.addBody(player.circleBody);
 	this.players.push(player);
 
