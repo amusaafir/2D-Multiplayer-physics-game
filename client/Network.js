@@ -1,18 +1,18 @@
 var Network = function(game) {
     this.game = game;
-	this.socket = io.connect();
-	this.tryConnect();
+    this.socket = io.connect();
+    this.tryConnect();
 };
 
 Network.prototype.tryConnect = function() {
-	if(this.socket.emit('connect', null)) {
+    if (this.socket.emit('connect', null)) {
         console.log('Successfully connected.');
         this.connected();
     } else {
         setTimeout(function() {
             console.log('Attempting to connect another time..');
             tryConnect();
-        }, 2000);    
+        }, 2000);
     }
 };
 
@@ -31,11 +31,11 @@ Network.prototype.getPlayers = function() {
     this.socket.emit('getPlayers', null);
 
     this.socket.on('getPlayers', function(playersData) {
-	    for(var i=0; i<playersData.length;i++) {
+        for (var i = 0; i < playersData.length; i++) {
             self.game.addPlayer(playersData[i].id, playersData[i].position[0], playersData[i].position[1]);
             self.game.players[i].circleBody.velocity = playersData[i].velocity;
             self.game.players[i].circleBody.angularVelocity = playersData[i].angularVelocity;
-        } 
+        }
     });
 };
 
@@ -43,7 +43,7 @@ Network.prototype.getWorldDetails = function() {
     var self = this;
 
     this.socket.emit('getWorldDetails', null);
-    
+
     this.socket.on('getWorldDetails', function(data) {
         self.game.world.time = data.time;
     });
@@ -72,11 +72,11 @@ Network.prototype.receiveState = function() {
     var self = this;
 
     this.socket.on('state', function(playersData) {
-        for(var i=0; i<self.game.players.length; i++) {
+        for (var i = 0; i < self.game.players.length; i++) {
             //players[i].circleBody.position = playersData[i].position;
             //players[i].circleBody.velocity = playersData[i].velocity;
             self.game.players[i].shadowX = playersData[i].position[0]
-            self.game.players[i].shadowY = playersData[i].position[1];   
+            self.game.players[i].shadowY = playersData[i].position[1];
         }
     });
 };
@@ -85,7 +85,7 @@ Network.prototype.receiveImpulseState = function() {
     var self = this;
 
     this.socket.on('impulseState', function(data) {
-        if(data.id != self.game.mainPlayerId) {
+        if (data.id != self.game.mainPlayerId) {
             self.game.currentId = data.id;
             self.game.currentX = data.x;
             self.game.currentY = data.y;

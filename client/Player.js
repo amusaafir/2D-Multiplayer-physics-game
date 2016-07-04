@@ -31,7 +31,7 @@ Player.prototype.draw = function() {
     this.renderer.ctx.fill();
     this.renderer.ctx.stroke();
     this.renderer.ctx.restore();
-}; 
+};
 
 Player.prototype.drawShadow = function() {
     this.renderer.ctx.beginPath();

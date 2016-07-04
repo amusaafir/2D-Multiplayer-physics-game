@@ -1,3 +1,3 @@
 var Settings = function() {
-	this.showServerPosition = true;
+    this.showServerPosition = true;
 };

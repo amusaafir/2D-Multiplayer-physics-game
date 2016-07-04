@@ -1,6 +1,6 @@
 var Renderer = function(players, settings) {
     this.players = players;
-    this.w; 
+    this.w;
     this.h;
     this.canvas;
     this.ctx;
@@ -24,10 +24,10 @@ Renderer.prototype.render = function() {
     this.ctx.scale(30, -30); // Zoom in and flip y axis
 
     // Draw all bodies
-    for(var i=0; i<this.players.length; i++) {
+    for (var i = 0; i < this.players.length; i++) {
         this.players[i].draw();
-        
-        if(this.settings.showServerPosition)
+
+        if (this.settings.showServerPosition)
             this.players[i].drawShadow();
     }
 
