@@ -1,3 +1,10 @@
+var Network = require('./Network.js');
+var Material = require('./Material.js');
+var World = require('./World.js');
+var Player = require('./Player.js');
+var Settings = require('./Settings.js');
+var Renderer = require('./Renderer.js');
+
 /**
  * The Game class holds the necessary objects for a single game. It can be
  * seen as the core class of the entire game.
@@ -176,3 +183,5 @@ Game.prototype.syncPositions = function() {
         this.players[i].circleBody.position = [this.players[i].shadowX, this.players[i].shadowY];
     }
 };
+
+module.exports = Game;

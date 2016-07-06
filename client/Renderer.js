@@ -34,3 +34,5 @@ Renderer.prototype.render = function() {
     // Restore transform
     this.ctx.restore();
 };
+
+module.exports = Renderer;

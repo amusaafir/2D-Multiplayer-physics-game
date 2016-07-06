@@ -103,3 +103,5 @@ Network.prototype.setTrajectory = function(x, y) {
         y: y
     });
 };
+
+module.exports = Network;
