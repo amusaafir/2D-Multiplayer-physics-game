@@ -16,3 +16,5 @@ World.prototype.createMaterials = function(material) {
 World.prototype.getWorld = function() {
     return this.world;
 };
+
+module.exports = World;

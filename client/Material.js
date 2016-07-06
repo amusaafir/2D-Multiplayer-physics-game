@@ -5,3 +5,5 @@ var Material = function() {
 Material.prototype.getBallMaterial = function() {
     return this.ballMaterial;
 };
+
+module.exports = Material;

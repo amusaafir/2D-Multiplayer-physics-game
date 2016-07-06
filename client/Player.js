@@ -42,3 +42,5 @@ Player.prototype.drawShadow = function() {
     this.renderer.ctx.stroke();
     this.renderer.ctx.restore();
 };
+
+module.exports = Player;
