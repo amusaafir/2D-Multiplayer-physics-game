@@ -1,7 +1,7 @@
 module.exports = {
   entry: "./client/loader.js",
   output: {
-    filename: "./client/bundle.js"
+    filename: "./build/bundle.js"
   },
   watch: true
 }
