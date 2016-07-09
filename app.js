@@ -11,6 +11,7 @@ app.use('/node_modules/p2/build/p2.js', express.static(path.join(__dirname, '/no
 app.use('/node_modules/socket.io/node_modules/socket.io-client/socket.io.js', express.static(path.join(__dirname, '/node_modules/socket.io/node_modules/socket.io-client/socket.io.js')));
 
 // Client data
+app.use('/resources/pixi.js', express.static(path.join(__dirname, '/resources/pixi.js')));
 app.use('/build/bundle.js', express.static(path.join(__dirname, '/build/bundle.js')));
 
 // Server loader
