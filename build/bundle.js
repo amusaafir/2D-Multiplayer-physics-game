@@ -419,6 +419,7 @@ World.prototype.getWorld = function() {
 module.exports = World;
 },{}],8:[function(require,module,exports){
 var Game = require('./Game.js');
+
 (function() {
     var game = new Game();
     window.game = game; // For debugging only
