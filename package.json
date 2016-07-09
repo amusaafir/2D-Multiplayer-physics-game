@@ -1,10 +1,10 @@
 {
-  "name": "nodeshizzle",
+  "name": "MultiplayerPhysicsGame",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A 2D multiplayer physics game.",
+  "main": "app.js",
   "scripts": {
-    "start": "webpack | node app.js",
+    "start": "browserify ./client/loader.js -o ./build/bundle.js | watchify ./client/loader.js -o ./build/bundle.js | node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -12,7 +12,10 @@
   "dependencies": {
     "express": "^4.13.4",
     "p2": "^0.7.1",
-    "socket.io": "^1.4.6",
-    "webpack": "^1.13.1"
+    "socket.io": "^1.4.6"
+  },
+  "devDependencies": {
+    "browserify": "^13.0.1",
+    "watchify": "^3.7.0"
   }
 }
