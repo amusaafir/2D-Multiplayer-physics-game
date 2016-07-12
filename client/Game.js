@@ -184,4 +184,15 @@ Game.prototype.syncPositions = function() {
     }
 };
 
+Game.prototype.printLocalPositions = function() {
+    for (var i = 0; i < this.players.length; i++) {
+        console.log(this.players[i].circleBody.position[0] + ', ' + this.players[i].circleBody.position[1]);
+    }
+};
+
+Game.prototype.moveTo = function(id,x,y) {
+    this.players[id].circleBody.position[0] = x;
+    this.players[id].circleBody.position[1] = y;
+};
+
 module.exports = Game;
