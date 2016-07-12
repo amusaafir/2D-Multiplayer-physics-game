@@ -25,11 +25,14 @@ function Game(io) {
 
 // TODO: Initialize in constructor; separate the creation of positions; separate world object
 Game.prototype.init = function() {
-    for (var x = -10; x < 10; x += 3) {
+    /*for (var x = -10; x < 10; x += 3) {
         for (var y = -8; y < 8; y += 3) {
             this.positions.push(new Position(x, y));
         }
-    }
+    }*/
+    this.positions.push(new Position(0, 0));
+    this.positions.push(new Position(-5, 0));
+    this.positions.push(new Position(5, 0));
 };
 
 Game.prototype.run = function() {

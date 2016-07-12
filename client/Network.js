@@ -32,6 +32,7 @@ Network.prototype.getPlayers = function() {
 
     this.socket.on('getPlayers', function(playersData) {
         for (var i = 0; i < playersData.length; i++) {
+            console.log(playersData[i].position[0] + ' - ' + playersData[i].position[1]);
             self.game.addPlayer(playersData[i].id, playersData[i].position[0], playersData[i].position[1]);
             self.game.players[i].circleBody.velocity = playersData[i].velocity;
             self.game.players[i].circleBody.angularVelocity = playersData[i].angularVelocity;
@@ -64,6 +65,7 @@ Network.prototype.addNewPlayer = function() {
     var self = this;
 
     this.socket.on('addNewPlayer', function(player) {
+        console.log('add player @ '+player.position[0]);
         self.game.addPlayer(player.id, player.position[0], player.position[1]);
     });
 };

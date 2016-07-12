@@ -185,6 +185,17 @@ Game.prototype.syncPositions = function() {
     }
 };
 
+Game.prototype.printLocalPositions = function() {
+    for (var i = 0; i < this.players.length; i++) {
+        console.log(this.players[i].circleBody.position[0] + ', ' + this.players[i].circleBody.position[1]);
+    }
+};
+
+Game.prototype.moveTo = function(id,x,y) {
+    this.players[id].circleBody.position[0] = x;
+    this.players[id].circleBody.position[1] = y;
+};
+
 module.exports = Game;
 },{"./Material.js":2,"./Network.js":3,"./Player.js":4,"./Renderer.js":5,"./Settings.js":6,"./World.js":7}],2:[function(require,module,exports){
 var Material = function() {
@@ -231,6 +242,7 @@ Network.prototype.getPlayers = function() {
 
     this.socket.on('getPlayers', function(playersData) {
         for (var i = 0; i < playersData.length; i++) {
+            console.log(playersData[i].position[0] + ' - ' + playersData[i].position[1]);
             self.game.addPlayer(playersData[i].id, playersData[i].position[0], playersData[i].position[1]);
             self.game.players[i].circleBody.velocity = playersData[i].velocity;
             self.game.players[i].circleBody.angularVelocity = playersData[i].angularVelocity;
@@ -263,6 +275,7 @@ Network.prototype.addNewPlayer = function() {
     var self = this;
 
     this.socket.on('addNewPlayer', function(player) {
+        console.log('add player @ '+player.position[0]);
         self.game.addPlayer(player.id, player.position[0], player.position[1]);
     });
 };
@@ -324,10 +337,23 @@ var Player = function(id, x, y, renderer, material) {
     this.shadowX = x;
     this.shadowY = y;
     this.renderer = renderer;
+
+    // One draw call
+    this.graphics = new PIXI.Graphics();
+    this.graphics.lineStyle(0);
+    this.graphics.beginFill(0xFFFFFF, 1);
+    this.graphics.drawCircle(this.circleBody.position[0],this.circleBody.position[1], 1);
+    this.renderer.container.addChild(this.graphics);
+
+    this.shadow = new PIXI.Graphics();
+    this.shadow.lineStyle(0);
+    this.shadow.beginFill(0xEEEEEE, 0.5);
+    this.shadow.drawCircle(this.circleBody.position[0],this.circleBody.position[1], 1);
+    this.renderer.container.addChild(this.shadow);
 };
 
-Player.prototype.draw = function() {
-    this.renderer.ctx.beginPath();
+Player.prototype.draw = function() { // TODO: should be called 'Transform'
+    /*this.renderer.ctx.beginPath();
     var x = this.circleBody.position[0],
         y = this.circleBody.position[1];
     this.renderer.ctx.save();
@@ -337,46 +363,60 @@ Player.prototype.draw = function() {
     this.renderer.ctx.fillStyle = 'orange';
     this.renderer.ctx.fill();
     this.renderer.ctx.stroke();
-    this.renderer.ctx.restore();
+    this.renderer.ctx.restore();*/
+     var x = this.circleBody.position[0],
+        y = this.circleBody.position[1];
+    this.graphics.position.x = x;
+    this.graphics.position.y = y;
+    this.graphics.rotation = this.circleBody.angle;
 };
 
 Player.prototype.drawShadow = function() {
-    this.renderer.ctx.beginPath();
+    /*this.renderer.ctx.beginPath();
     this.renderer.ctx.save();
     this.renderer.ctx.translate(this.shadowX, this.shadowY);
     this.renderer.ctx.rotate(this.circleBody.angle);
     this.renderer.ctx.arc(0, 0, 1, 0, 2 * Math.PI);
     this.renderer.ctx.stroke();
-    this.renderer.ctx.restore();
+    this.renderer.ctx.restore();*/
+     this.shadow.position.x = this.shadowX;
+    this.shadow.position.y =  this.shadowY;  
 };
 
 module.exports = Player;
 },{}],5:[function(require,module,exports){
 var Renderer = function(players, settings) {
     this.players = players;
+    this.settings = settings;
+
+    // Canvas
     this.w;
     this.h;
     this.canvas;
-    this.ctx;
+    
+    // Stage
+    this.stage = new PIXI.Stage(0xFFFFFF, true);
+    this.stage.interactive = true;
+    this.renderer = PIXI.autoDetectRenderer(800, 600);
+    this.renderer.view.style.display = "block";
+    document.body.appendChild(this.renderer.view);
+
+    // Container
+    this.container = new PIXI.Container();
+    this.container.position.x =  this.renderer.width/2;
+    this.container.position.y =  this.renderer.height/2;
+    this.zoom = 20;
+    this.container.scale.x =  this.zoom;  // zoom in
+    this.container.scale.y = -this.zoom; // Note: we flip the y axis to make "up" the physics "up"
+    this.stage.addChild(this.container);
+    window.container = this.container;
     this.init();
-    this.settings = settings;
 };
 
 Renderer.prototype.init = function() {
-    this.canvas = document.getElementById("canvas");
-    this.w = this.canvas.width;
-    this.h = this.canvas.height;
-    this.ctx = canvas.getContext("2d");
-    this.ctx.lineWidth = 0.05;
 };
 
 Renderer.prototype.render = function() {
-    // Clear the canvas
-    this.ctx.clearRect(0, 0, this.w, this.h);
-    this.ctx.save();
-    this.ctx.translate(this.w / 2, this.h / 2); // Translate to the center
-    this.ctx.scale(30, -30); // Zoom in and flip y axis
-
     // Draw all bodies
     for (var i = 0; i < this.players.length; i++) {
         this.players[i].draw();
@@ -386,7 +426,7 @@ Renderer.prototype.render = function() {
     }
 
     // Restore transform
-    this.ctx.restore();
+    this.renderer.render(this.stage);
 };
 
 module.exports = Renderer;
