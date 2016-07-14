@@ -30,9 +30,9 @@ Game.prototype.init = function() {
             this.positions.push(new Position(x, y));
         }
     }*/
-    this.positions.push(new Position(0, 0));
-    this.positions.push(new Position(-5, 0));
-    this.positions.push(new Position(5, 0));
+  //  this.positions.push(new Position(-0.39607325196266174, 0));
+    
+   this.positions.push(new Position(2, 2));
 };
 
 Game.prototype.run = function() {
@@ -56,6 +56,12 @@ Game.prototype.sendState = function() {
         if (self.io) {
             self.io.emit('state', clientDetails);
         }
+
+
+        if(self.players.length>0) {
+            console.log(self.players[0].circleBody.position[0]);
+        }
+        
     }, 500);
 };
 
@@ -64,6 +70,7 @@ Game.prototype.postStep = function() {
 
     this.world.world.on("postStep", function() {
         if (self.request) {
+            console.log('applied');
             self.players[self.currentId].circleBody.applyForce([self.currentX, self.currentY], self.players[self.currentId].circleBody.position);
             self.request = false;
         }

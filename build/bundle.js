@@ -140,6 +140,7 @@ Game.prototype.postStep = function() {
 
     this.world.getWorld().on("postStep", function() {
         if (self.request) {
+            console.log('perform!');
             self.players[self.currentId].circleBody.applyForce([self.currentX, self.currentY], self.players[self.currentId].circleBody.position);
             self.request = false;
         }
@@ -196,6 +197,14 @@ Game.prototype.moveTo = function(id,x,y) {
     this.players[id].circleBody.position[1] = y;
 };
 
+Game.prototype.drawCircle = function(x, y) {
+    this.graphics = new PIXI.Graphics();
+    this.graphics.lineStyle(0);
+    this.graphics.beginFill(0xFFFFFF, 1);
+    this.graphics.drawCircle(x,y, 1);
+    this.renderer.container.addChild(this.graphics);
+};
+
 module.exports = Game;
 },{"./Material.js":2,"./Network.js":3,"./Player.js":4,"./Renderer.js":5,"./Settings.js":6,"./World.js":7}],2:[function(require,module,exports){
 var Material = function() {
@@ -242,7 +251,7 @@ Network.prototype.getPlayers = function() {
 
     this.socket.on('getPlayers', function(playersData) {
         for (var i = 0; i < playersData.length; i++) {
-            console.log(playersData[i].position[0] + ' - ' + playersData[i].position[1]);
+            console.log('pos' + playersData[i].position[0] + ' - ' + playersData[i].position[1]);
             self.game.addPlayer(playersData[i].id, playersData[i].position[0], playersData[i].position[1]);
             self.game.players[i].circleBody.velocity = playersData[i].velocity;
             self.game.players[i].circleBody.angularVelocity = playersData[i].angularVelocity;
@@ -267,6 +276,7 @@ Network.prototype.addMainPlayer = function() {
 
     this.socket.on('addMainPlayer', function(player) {
         self.game.mainPlayerId = player.id;
+        console.log('add mp: ' + player.position[0] + ', ' + player.position[1]);
         self.game.addPlayer(player.id, player.position[0], player.position[1]);
     });
 };
@@ -287,7 +297,7 @@ Network.prototype.receiveState = function() {
         for (var i = 0; i < self.game.players.length; i++) {
             //players[i].circleBody.position = playersData[i].position;
             //players[i].circleBody.velocity = playersData[i].velocity;
-            self.game.players[i].shadowX = playersData[i].position[0]
+            self.game.players[i].shadowX = playersData[i].position[0];
             self.game.players[i].shadowY = playersData[i].position[1];
         }
     });
@@ -342,13 +352,19 @@ var Player = function(id, x, y, renderer, material) {
     this.graphics = new PIXI.Graphics();
     this.graphics.lineStyle(0);
     this.graphics.beginFill(0xFFFFFF, 1);
+    console.log('inside p: ' + this.circleBody.position[0] + ', ' + this.circleBody.position[1]);
+    console.log('inside pxy: ' + x + ', ' + y);
     this.graphics.drawCircle(this.circleBody.position[0],this.circleBody.position[1], 1);
+    this.graphics.position.x = this.circleBody.position[0];
+    this.graphics.position.y = this.circleBody.position[1];
     this.renderer.container.addChild(this.graphics);
 
     this.shadow = new PIXI.Graphics();
     this.shadow.lineStyle(0);
     this.shadow.beginFill(0xEEEEEE, 0.5);
     this.shadow.drawCircle(this.circleBody.position[0],this.circleBody.position[1], 1);
+    this.shadow.position.x = this.shadowX;
+    this.shadow.position.y = this.shadowY;
     this.renderer.container.addChild(this.shadow);
 };
 
@@ -364,11 +380,10 @@ Player.prototype.draw = function() { // TODO: should be called 'Transform'
     this.renderer.ctx.fill();
     this.renderer.ctx.stroke();
     this.renderer.ctx.restore();*/
-     var x = this.circleBody.position[0],
+    var x = this.circleBody.position[0],
         y = this.circleBody.position[1];
     this.graphics.position.x = x;
     this.graphics.position.y = y;
-    this.graphics.rotation = this.circleBody.angle;
 };
 
 Player.prototype.drawShadow = function() {
@@ -379,8 +394,8 @@ Player.prototype.drawShadow = function() {
     this.renderer.ctx.arc(0, 0, 1, 0, 2 * Math.PI);
     this.renderer.ctx.stroke();
     this.renderer.ctx.restore();*/
-     this.shadow.position.x = this.shadowX;
-    this.shadow.position.y =  this.shadowY;  
+     //this.shadow.position.x = this.shadowX;
+   // this.shadow.position.y =  this.shadowY;  
 };
 
 module.exports = Player;

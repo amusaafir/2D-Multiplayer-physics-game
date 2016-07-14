@@ -139,6 +139,7 @@ Game.prototype.postStep = function() {
 
     this.world.getWorld().on("postStep", function() {
         if (self.request) {
+            console.log('perform!');
             self.players[self.currentId].circleBody.applyForce([self.currentX, self.currentY], self.players[self.currentId].circleBody.position);
             self.request = false;
         }
@@ -193,6 +194,14 @@ Game.prototype.printLocalPositions = function() {
 Game.prototype.moveTo = function(id,x,y) {
     this.players[id].circleBody.position[0] = x;
     this.players[id].circleBody.position[1] = y;
+};
+
+Game.prototype.drawCircle = function(x, y) {
+    this.graphics = new PIXI.Graphics();
+    this.graphics.lineStyle(0);
+    this.graphics.beginFill(0xFFFFFF, 1);
+    this.graphics.drawCircle(x,y, 1);
+    this.renderer.container.addChild(this.graphics);
 };
 
 module.exports = Game;
