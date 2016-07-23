@@ -10,7 +10,7 @@ Network.prototype.tryConnect = function() {
         this.connected();
     } else {
         setTimeout(function() {
-            console.log('Attempting to connect another time..');
+            console.log('Attempting to connect..');
             tryConnect();
         }, 2000);
     }
@@ -32,7 +32,6 @@ Network.prototype.getPlayers = function() {
 
     this.socket.on('getPlayers', function(playersData) {
         for (var i = 0; i < playersData.length; i++) {
-            console.log('pos' + playersData[i].position[0] + ' - ' + playersData[i].position[1]);
             self.game.addPlayer(playersData[i].id, playersData[i].position[0], playersData[i].position[1]);
             self.game.players[i].circleBody.velocity = playersData[i].velocity;
             self.game.players[i].circleBody.angularVelocity = playersData[i].angularVelocity;
@@ -57,7 +56,6 @@ Network.prototype.addMainPlayer = function() {
 
     this.socket.on('addMainPlayer', function(player) {
         self.game.mainPlayerId = player.id;
-        console.log('add mp: ' + player.position[0] + ', ' + player.position[1]);
         self.game.addPlayer(player.id, player.position[0], player.position[1]);
     });
 };
@@ -66,7 +64,6 @@ Network.prototype.addNewPlayer = function() {
     var self = this;
 
     this.socket.on('addNewPlayer', function(player) {
-        console.log('add player @ '+player.position[0]);
         self.game.addPlayer(player.id, player.position[0], player.position[1]);
     });
 };
