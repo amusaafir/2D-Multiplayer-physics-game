@@ -373,33 +373,38 @@ module.exports = Player;
 var Renderer = function(players, settings) {
     this.players = players;
     this.settings = settings;
+    this.renderer;
+    this.container;
+    this.zoom = 50;
 
-    // Canvas
-    this.w;
-    this.h;
-    this.canvas;
+    this.initRenderer();
+    this.initContainer();
+    this.windowResize();
+};
+
+Renderer.prototype.initRenderer = function() {
+    var width = 1920;
+    var height = 1080;
     
-    // Stage
-    this.stage = new PIXI.Stage(0xFFFFFF, true);
-    this.stage.interactive = true;
-    this.renderer = PIXI.autoDetectRenderer(1920, 1080);
-    this.ratio = 1920 / 1080;
-    this.resize();
+    this.renderer = PIXI.autoDetectRenderer(width, height);
+    this.ratio = width / height;
+
+    this.resize(); // Resize the render according to the client's screen
+    
+    // Add the renderer to the document
     this.renderer.view.style.display = "block";
     document.body.appendChild(this.renderer.view);
+};
 
-    // Container
+Renderer.prototype.initContainer = function() {
     this.container = new PIXI.Container();
-    this.container.position.x =  this.renderer.width/2;
-    this.container.position.y =  this.renderer.height/2;
-    this.zoom = 50;
-    this.container.scale.x =  this.zoom;  // zoom in
-    this.container.scale.y = -this.zoom; // Note: we flip the y axis to make "up" the physics "up"
-    this.stage.addChild(this.container);
+    this.container.position.x = this.renderer.width / 2;
+    this.container.position.y = this.renderer.height / 2;
+    
+    this.container.scale.x = this.zoom;
+    this.container.scale.y = -this.zoom; // Flip to behave like the physics engine
     window.container = this.container; // For debugging purposes only
     window.renderer = this.renderer; // For debugging purposes only
-
-    this.windowResize();
 };
 
 Renderer.prototype.resize = function() {
@@ -414,6 +419,7 @@ Renderer.prototype.resize = function() {
 
 Renderer.prototype.windowResize = function() {
     var self = this;
+   
     window.onresize = function(event) {
         self.resize();
     };
@@ -429,7 +435,7 @@ Renderer.prototype.render = function() {
     }
 
     // Restore transform
-    this.renderer.render(this.stage);
+    this.renderer.render(this.container);
 };
 
 module.exports = Renderer;
