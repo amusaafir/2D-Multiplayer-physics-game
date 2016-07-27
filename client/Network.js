@@ -56,7 +56,7 @@ Network.prototype.addMainPlayer = function() {
 
     this.socket.on('addMainPlayer', function(player) {
         self.game.mainPlayerId = player.id;
-        self.game.addPlayer(player.id, player.position[0], player.position[1]);
+        self.game.addPlayer(player.id, player.position[0], player.position[1], true);
     });
 };
 
@@ -64,7 +64,7 @@ Network.prototype.addNewPlayer = function() {
     var self = this;
 
     this.socket.on('addNewPlayer', function(player) {
-        self.game.addPlayer(player.id, player.position[0], player.position[1]);
+        self.game.addPlayer(player.id, player.position[0], player.position[1], false);
     });
 };
 

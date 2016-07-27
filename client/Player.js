@@ -1,14 +1,15 @@
-var Player = function(id, x, y, renderer, material) {
+var Player = function(id, x, y, renderer, material, input) {
     this.id = id;
     this.circleShape;
     this.circleBody;
     this.shadowX = x;
     this.shadowY = y;
     this.renderer = renderer;
-
+    this.input = input;
     this.initCircleShape(material);
     this.initPhysicsBody(x, y);
     this.createGraphics();
+    this.createHitArea();
 };
 
 Player.prototype.initCircleShape = function(material) {
@@ -54,6 +55,25 @@ Player.prototype.createGraphics = function() {
     this.shadow.drawCircle(0,0, 1);
     this.shadow.position.set(this.circleBody.position[0], this.circleBody.position[1]);
     this.renderer.container.addChild(this.shadow);
+};
+
+Player.prototype.createHitArea = function () {
+    var self = this;
+
+    this.graphics.interactive = true;
+    this.graphics.hitarea = new PIXI.Circle(0, 0, 1);
+    
+    this.graphics.click = function(event) {
+    };
+    this.graphics.mousedown = function(event) {
+        if(self.input) {
+            self.input.clickedOnCircle(self.circleBody.position[0], self.circleBody.position[1]);
+        }
+    };
+    this.graphics.mouseout = function(event) {
+    };
+    this.graphics.mouseup = function(event) {
+    };
 };
 
 module.exports = Player;

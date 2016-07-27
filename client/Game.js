@@ -1,3 +1,4 @@
+var Input = require('./Input.js');
 var Network = require('./Network.js');
 var Material = require('./Material.js');
 var World = require('./World.js');
@@ -10,6 +11,8 @@ var Renderer = require('./Renderer.js');
  * seen as the core class of the entire game.
  */
 var Game = function() {
+    this.input = new Input(this);
+
     /**
      * The Network object with the current game instance.
      * @type {Network}
@@ -124,8 +127,11 @@ Game.prototype.draw = function() {
  * @param {[Number]} x  [The x starting position.]
  * @param {[Number]} y  [The y starting position.]
  */
-Game.prototype.addPlayer = function(id, x, y) {
+Game.prototype.addPlayer = function(id, x, y, isMainplayer) {
     var player = new Player(id, x, y, this.renderer, this.material.getBallMaterial());
+    if(isMainplayer) {
+        player.input = this.input;
+    }
     this.world.getWorld().addBody(player.circleBody);
     this.players.push(player);
 };
@@ -152,6 +158,10 @@ Game.prototype.postStep = function() {
  * @param  {[type]} y [The y coordinate of the trajectory.]
  */
 Game.prototype.trajectory = function(x, y) {
+    console.log(x + ',' + y);
+    var force = 100;
+    x*=force;
+    y*=force;
     this.currentId = this.mainPlayerId;
     this.currentX = x;
     this.currentY = y;
@@ -195,12 +205,8 @@ Game.prototype.moveTo = function(id,x,y) {
     this.players[id].circleBody.position[1] = y;
 };
 
-Game.prototype.drawCircle = function(x, y) {
-    this.graphics = new PIXI.Graphics();
-    this.graphics.lineStyle(0);
-    this.graphics.beginFill(0xFFFFFF, 1);
-    this.graphics.drawCircle(x,y, 1);
-    this.renderer.container.addChild(this.graphics);
+Game.prototype.drawTrajectory = function(x, y) {
+    
 };
 
 module.exports = Game;
