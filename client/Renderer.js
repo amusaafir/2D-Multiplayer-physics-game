@@ -66,4 +66,8 @@ Renderer.prototype.render = function() {
     this.renderer.render(this.container);
 };
 
+Renderer.prototype.getLocalMousePosition = function() {
+    return this.renderer.plugins.interaction.mouse.getLocalPosition(this.container);
+};
+
 module.exports = Renderer;

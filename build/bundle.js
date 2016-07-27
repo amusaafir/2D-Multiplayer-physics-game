@@ -1,4 +1,5 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var Input = require('./Input.js');
 var Network = require('./Network.js');
 var Material = require('./Material.js');
 var World = require('./World.js');
@@ -11,6 +12,8 @@ var Renderer = require('./Renderer.js');
  * seen as the core class of the entire game.
  */
 var Game = function() {
+    this.input = new Input(this);
+
     /**
      * The Network object with the current game instance.
      * @type {Network}
@@ -125,8 +128,11 @@ Game.prototype.draw = function() {
  * @param {[Number]} x  [The x starting position.]
  * @param {[Number]} y  [The y starting position.]
  */
-Game.prototype.addPlayer = function(id, x, y) {
+Game.prototype.addPlayer = function(id, x, y, isMainplayer) {
     var player = new Player(id, x, y, this.renderer, this.material.getBallMaterial());
+    if(isMainplayer) {
+        player.input = this.input;
+    }
     this.world.getWorld().addBody(player.circleBody);
     this.players.push(player);
 };
@@ -153,6 +159,10 @@ Game.prototype.postStep = function() {
  * @param  {[type]} y [The y coordinate of the trajectory.]
  */
 Game.prototype.trajectory = function(x, y) {
+    console.log(x + ',' + y);
+    var force = 100;
+    x*=force;
+    y*=force;
     this.currentId = this.mainPlayerId;
     this.currentX = x;
     this.currentY = y;
@@ -196,16 +206,56 @@ Game.prototype.moveTo = function(id,x,y) {
     this.players[id].circleBody.position[1] = y;
 };
 
-Game.prototype.drawCircle = function(x, y) {
-    this.graphics = new PIXI.Graphics();
-    this.graphics.lineStyle(0);
-    this.graphics.beginFill(0xFFFFFF, 1);
-    this.graphics.drawCircle(x,y, 1);
-    this.renderer.container.addChild(this.graphics);
+Game.prototype.drawTrajectory = function(x, y) {
+    
 };
 
 module.exports = Game;
-},{"./Material.js":2,"./Network.js":3,"./Player.js":4,"./Renderer.js":5,"./Settings.js":6,"./World.js":7}],2:[function(require,module,exports){
+},{"./Input.js":2,"./Material.js":3,"./Network.js":4,"./Player.js":5,"./Renderer.js":6,"./Settings.js":7,"./World.js":8}],2:[function(require,module,exports){
+var Input = function(game) {
+	this.trajectory = {
+    	startVector: {
+    		x: 0,
+    		y: 0
+    	},
+    	endVector: {
+    		x: 0,
+    		y: 0
+    	}
+    };
+
+    this.game = game;
+    this.initInputEvents();
+};
+
+Input.prototype.initInputEvents = function() {
+    var self = this;
+
+    window.onmouseup = function() {
+        self.trajectory.endVector = {
+        	x: self.game.renderer.getLocalMousePosition().x,
+        	y: self.game.renderer.getLocalMousePosition().y
+        };
+
+        var xTrajectory = self.trajectory.endVector.x - self.trajectory.startVector.x;
+        var yTrajectory = self.trajectory.endVector.y - self.trajectory.startVector.y;
+
+        self.game.trajectory(xTrajectory, yTrajectory);
+    };
+};
+
+// This will be only invoked when the player clickes on his own objects (circles)
+Input.prototype.clickedOnCircle = function(x, y) {
+	this.trajectory.startVector = {
+		x: x,
+		y: y
+	};
+};
+
+// Trajectory method here?
+
+module.exports = Input;
+},{}],3:[function(require,module,exports){
 var Material = function() {
     this.ballMaterial = new p2.Material();
 };
@@ -215,7 +265,7 @@ Material.prototype.getBallMaterial = function() {
 };
 
 module.exports = Material;
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 var Network = function(game) {
     this.game = game;
     this.socket = io.connect();
@@ -274,7 +324,7 @@ Network.prototype.addMainPlayer = function() {
 
     this.socket.on('addMainPlayer', function(player) {
         self.game.mainPlayerId = player.id;
-        self.game.addPlayer(player.id, player.position[0], player.position[1]);
+        self.game.addPlayer(player.id, player.position[0], player.position[1], true);
     });
 };
 
@@ -282,7 +332,7 @@ Network.prototype.addNewPlayer = function() {
     var self = this;
 
     this.socket.on('addNewPlayer', function(player) {
-        self.game.addPlayer(player.id, player.position[0], player.position[1]);
+        self.game.addPlayer(player.id, player.position[0], player.position[1], false);
     });
 };
 
@@ -323,18 +373,19 @@ Network.prototype.setTrajectory = function(x, y) {
 };
 
 module.exports = Network;
-},{}],4:[function(require,module,exports){
-var Player = function(id, x, y, renderer, material) {
+},{}],5:[function(require,module,exports){
+var Player = function(id, x, y, renderer, material, input) {
     this.id = id;
     this.circleShape;
     this.circleBody;
     this.shadowX = x;
     this.shadowY = y;
     this.renderer = renderer;
-
+    this.input = input;
     this.initCircleShape(material);
     this.initPhysicsBody(x, y);
     this.createGraphics();
+    this.createHitArea();
 };
 
 Player.prototype.initCircleShape = function(material) {
@@ -382,8 +433,27 @@ Player.prototype.createGraphics = function() {
     this.renderer.container.addChild(this.shadow);
 };
 
+Player.prototype.createHitArea = function () {
+    var self = this;
+
+    this.graphics.interactive = true;
+    this.graphics.hitarea = new PIXI.Circle(0, 0, 1);
+    
+    this.graphics.click = function(event) {
+    };
+    this.graphics.mousedown = function(event) {
+        if(self.input) {
+            self.input.clickedOnCircle(self.circleBody.position[0], self.circleBody.position[1]);
+        }
+    };
+    this.graphics.mouseout = function(event) {
+    };
+    this.graphics.mouseup = function(event) {
+    };
+};
+
 module.exports = Player;
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 var Renderer = function(players, settings) {
     this.players = players;
     this.settings = settings;
@@ -452,14 +522,18 @@ Renderer.prototype.render = function() {
     this.renderer.render(this.container);
 };
 
+Renderer.prototype.getLocalMousePosition = function() {
+    return this.renderer.plugins.interaction.mouse.getLocalPosition(this.container);
+};
+
 module.exports = Renderer;
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 var Settings = function() {
     this.showServerPosition = true;
 };
 
 module.exports = Settings;
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var World = function(material) {
     this.world = new p2.World({ gravity: [0, 0] });
     this.world.frictionGravity = 1;
@@ -480,7 +554,7 @@ World.prototype.getWorld = function() {
 };
 
 module.exports = World;
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var Game = require('./Game.js');
 
 (function() {
@@ -488,4 +562,4 @@ var Game = require('./Game.js');
     window.game = game; // For debugging only
 })();
 
-},{"./Game.js":1}]},{},[8]);
+},{"./Game.js":1}]},{},[9]);
