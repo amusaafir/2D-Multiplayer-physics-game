@@ -102,8 +102,8 @@ Game.prototype.run = function() {
     var self = this;
 
     setInterval(function() {
-        self.world.getWorld().step(1 / 60);
-    }, 1000 / 60);
+        self.world.getWorld().step(1 / 120);
+    }, 1000 / 120);
 };
 
 /**
@@ -158,10 +158,10 @@ Game.prototype.postStep = function() {
  * @param  {[type]} y [The y coordinate of the trajectory.]
  */
 Game.prototype.trajectory = function(x, y) {
-    console.log(x + ',' + y);
-    var force = 100;
-    x*=force;
-    y*=force;
+    var force = 600; // TODO: Add force limit; mainly necessary on the server side.
+    x *= force;
+    y *= force;
+    
     this.currentId = this.mainPlayerId;
     this.currentX = x;
     this.currentY = y;

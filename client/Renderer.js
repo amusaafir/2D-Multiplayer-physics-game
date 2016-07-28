@@ -3,7 +3,7 @@ var Renderer = function(players, settings) {
     this.settings = settings;
     this.renderer;
     this.container;
-    this.zoom = 50;
+    this.zoom = 20;
 
     this.initRenderer();
     this.initContainer();

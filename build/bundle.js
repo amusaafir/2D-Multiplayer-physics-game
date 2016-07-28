@@ -103,8 +103,8 @@ Game.prototype.run = function() {
     var self = this;
 
     setInterval(function() {
-        self.world.getWorld().step(1 / 60);
-    }, 1000 / 60);
+        self.world.getWorld().step(1 / 120);
+    }, 1000 / 120);
 };
 
 /**
@@ -159,10 +159,10 @@ Game.prototype.postStep = function() {
  * @param  {[type]} y [The y coordinate of the trajectory.]
  */
 Game.prototype.trajectory = function(x, y) {
-    console.log(x + ',' + y);
-    var force = 100;
-    x*=force;
-    y*=force;
+    var force = 600; // TODO: Add force limit; mainly necessary on the server side.
+    x *= force;
+    y *= force;
+    
     this.currentId = this.mainPlayerId;
     this.currentX = x;
     this.currentY = y;
@@ -374,6 +374,8 @@ Network.prototype.setTrajectory = function(x, y) {
 
 module.exports = Network;
 },{}],5:[function(require,module,exports){
+var Settings = require('./Settings.js');
+
 var Player = function(id, x, y, renderer, material, input) {
     this.id = id;
     this.circleShape;
@@ -382,6 +384,7 @@ var Player = function(id, x, y, renderer, material, input) {
     this.shadowY = y;
     this.renderer = renderer;
     this.input = input;
+    this.settings = new Settings();
     this.initCircleShape(material);
     this.initPhysicsBody(x, y);
     this.createGraphics();
@@ -401,7 +404,7 @@ Player.prototype.initPhysicsBody = function(x, y) {
         position: [x, y],
         angularVelocity: 1
     });
-    this.circleBody.damping = .8;
+    this.circleBody.damping = .7;
     this.circleBody.addShape(this.circleShape);
     this.circleBody.allowSleep = true;
     this.circleBody.sleepSpeedLimit = 1;
@@ -425,12 +428,14 @@ Player.prototype.createGraphics = function() {
     this.renderer.container.addChild(this.graphics);
 
     // Server position
-    this.shadow = new PIXI.Graphics();
-    this.shadow.lineStyle(0);
-    this.shadow.beginFill(0xEEEEEE, 0.5);
-    this.shadow.drawCircle(0,0, 1);
-    this.shadow.position.set(this.circleBody.position[0], this.circleBody.position[1]);
-    this.renderer.container.addChild(this.shadow);
+    if(this.settings.showServerPosition) {
+        this.shadow = new PIXI.Graphics();
+        this.shadow.lineStyle(0);
+        this.shadow.beginFill(0xEEEEEE, 0.5);
+        this.shadow.drawCircle(0,0, 1);
+        this.shadow.position.set(this.circleBody.position[0], this.circleBody.position[1]);
+        this.renderer.container.addChild(this.shadow);
+    }
 };
 
 Player.prototype.createHitArea = function () {
@@ -453,13 +458,13 @@ Player.prototype.createHitArea = function () {
 };
 
 module.exports = Player;
-},{}],6:[function(require,module,exports){
+},{"./Settings.js":7}],6:[function(require,module,exports){
 var Renderer = function(players, settings) {
     this.players = players;
     this.settings = settings;
     this.renderer;
     this.container;
-    this.zoom = 50;
+    this.zoom = 20;
 
     this.initRenderer();
     this.initContainer();

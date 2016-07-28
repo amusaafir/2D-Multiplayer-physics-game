@@ -1,3 +1,5 @@
+var Settings = require('./Settings.js');
+
 var Player = function(id, x, y, renderer, material, input) {
     this.id = id;
     this.circleShape;
@@ -6,6 +8,7 @@ var Player = function(id, x, y, renderer, material, input) {
     this.shadowY = y;
     this.renderer = renderer;
     this.input = input;
+    this.settings = new Settings();
     this.initCircleShape(material);
     this.initPhysicsBody(x, y);
     this.createGraphics();
@@ -25,7 +28,7 @@ Player.prototype.initPhysicsBody = function(x, y) {
         position: [x, y],
         angularVelocity: 1
     });
-    this.circleBody.damping = .8;
+    this.circleBody.damping = .7;
     this.circleBody.addShape(this.circleShape);
     this.circleBody.allowSleep = true;
     this.circleBody.sleepSpeedLimit = 1;
@@ -49,12 +52,14 @@ Player.prototype.createGraphics = function() {
     this.renderer.container.addChild(this.graphics);
 
     // Server position
-    this.shadow = new PIXI.Graphics();
-    this.shadow.lineStyle(0);
-    this.shadow.beginFill(0xEEEEEE, 0.5);
-    this.shadow.drawCircle(0,0, 1);
-    this.shadow.position.set(this.circleBody.position[0], this.circleBody.position[1]);
-    this.renderer.container.addChild(this.shadow);
+    if(this.settings.showServerPosition) {
+        this.shadow = new PIXI.Graphics();
+        this.shadow.lineStyle(0);
+        this.shadow.beginFill(0xEEEEEE, 0.5);
+        this.shadow.drawCircle(0,0, 1);
+        this.shadow.position.set(this.circleBody.position[0], this.circleBody.position[1]);
+        this.renderer.container.addChild(this.shadow);
+    }
 };
 
 Player.prototype.createHitArea = function () {
