@@ -13,7 +13,7 @@ function Player(id, position, material) {
         position: [position.x, position.y],
         angularVelocity: 1
     });
-    this.circleBody.damping = .8;
+    this.circleBody.damping = .7;
     this.circleBody.addShape(this.circleShape);
 
     this.circleBody.allowSleep = true;

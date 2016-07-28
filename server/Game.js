@@ -36,8 +36,8 @@ Game.prototype.run = function() {
     var self = this;
 
     setInterval(function() {
-        self.world.world.step(1 / 60);
-    }, 1000 / 60);
+        self.world.world.step(1 / 120);
+    }, 1000 / 120);
 };
 
 Game.prototype.sendState = function() {
