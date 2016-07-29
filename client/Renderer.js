@@ -1,9 +1,9 @@
-var Renderer = function(players, settings) {
-    this.players = players;
+var Renderer = function(game, settings) {
+    this.game = game;
     this.settings = settings;
     this.renderer;
     this.container;
-    this.zoom = 20;
+    this.zoom = 40;
 
     this.initRenderer();
     this.initContainer();
@@ -54,13 +54,18 @@ Renderer.prototype.windowResize = function() {
 };
 
 Renderer.prototype.render = function() {
-    // Draw all bodies
-    for (var i = 0; i < this.players.length; i++) {
-        this.players[i].draw();
+    // Draw all players
+    for (var i = 0; i < this.game.players.length; i++) {
+        this.game.players[i].draw();
 
         if (this.settings.showServerPosition)
-            this.players[i].drawShadow();
+            this.game.players[i].drawShadow();
     }
+
+    // Draw all walls
+    for (var i = 0; i < this.game.walls.length; i++) {
+        this.game.walls[i].draw();
+    }    
 
     // Restore transform
     this.renderer.render(this.container);

@@ -1,4 +1,4 @@
-// TODO: Abstract physics engine.
+// TODO: Load physics engine through an interface
 
 var p2 = require('p2');
 

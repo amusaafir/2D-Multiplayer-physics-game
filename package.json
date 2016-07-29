@@ -4,7 +4,7 @@
   "description": "A 2D multiplayer physics game.",
   "main": "app.js",
   "scripts": {
-    "start": "browserify ./client/loader.js -o ./build/bundle.js | watchify ./client/loader.js -o ./build/bundle.js | node app.js",
+    "start": "browserify ./client/Engine.js -o ./build/bundle.js | watchify ./client/Engine.js -o ./build/bundle.js | node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

@@ -1,17 +1,20 @@
-var Player = require('./Player');
+var Player = require('./entities/Player');
+var Wall = require('./entities/Wall');
 var Position = require('./Position');
-var World = require('./World');
-var Material = require('./Material');
+var World = require('./world/World');
+var Material = require('./world/Material');
 
 function Game(io) {
     this.io = io;
 
     this.players = [];
+    this.walls = [];
     this.positions = [];
     this.material = new Material();
     this.world = new World(this.material);
 
-    this.init();
+    
+    this.loadScenery(); // TODO: Create separate 'scene' object
     this.run();
     this.sendState();
     this.postStep();
@@ -23,13 +26,27 @@ function Game(io) {
     this.request = false;
 }
 
-// TODO: Initialize in constructor; separate the creation of positions; separate world object
-Game.prototype.init = function() {
+Game.prototype.loadScenery = function() {
+    this.initPlayerPositions();
+    this.createWalls();
+};
+
+Game.prototype.initPlayerPositions = function() {
     for (var x = -10; x < 10; x += 3) {
         for (var y = -8; y < 8; y += 3) {
             this.positions.push(new Position(x, y));
         }
     }
+};
+
+Game.prototype.createWalls = function() {
+    this.addWall();
+};
+
+Game.prototype.addWall = function() {
+    var wall = new Wall(this.material.getBallMaterial());
+    this.world.world.addBody(wall.boxBody);
+    this.walls.push(wall);
 };
 
 Game.prototype.run = function() {
