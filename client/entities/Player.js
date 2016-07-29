@@ -1,4 +1,4 @@
-var Settings = require('./Settings.js');
+var Settings = require('../Settings.js');
 
 var Player = function(id, x, y, renderer, material, input) {
     this.id = id;

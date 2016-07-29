@@ -1,9 +1,18 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var Game = require('./Game.js');
+
+(function() {
+    var game = new Game();
+    window.game = game; // For debugging only
+})();
+
+},{"./Game.js":2}],2:[function(require,module,exports){
 var Input = require('./Input.js');
 var Network = require('./Network.js');
-var Material = require('./Material.js');
-var World = require('./World.js');
-var Player = require('./Player.js');
+var Material = require('./world/Material.js');
+var World = require('./world/World.js');
+var Player = require('./entities/Player.js');
+var Wall = require('./entities/Wall.js');
 var Settings = require('./Settings.js');
 var Renderer = require('./Renderer.js');
 
@@ -31,6 +40,8 @@ var Game = function() {
      * @type {Array of type Player}
      */
     this.players = [];
+
+    this.walls = [];
     
     /**
      * The material object, which holds the materials for the current game.
@@ -54,7 +65,7 @@ var Game = function() {
      * The Renderer object.
      * @type {Renderer}
      */
-    this.renderer = new Renderer(this.players, this.settings);
+    this.renderer = new Renderer(this, this.settings);
 
     /**
      * The id of the player performing an action on postStep.
@@ -210,8 +221,19 @@ Game.prototype.drawTrajectory = function(x, y) {
     
 };
 
+Game.prototype.addWall = function(x, y, velocity, angularVelocity, angle) {
+    var wall = new Wall(this.renderer, this.material.getBallMaterial());
+    wall.boxBody.position[0] = x;
+    wall.boxBody.position[1] = y;
+    wall.boxBody.angle = angle;
+    wall.boxBody.velocity = velocity;
+    wall.boxBody.angularVelocity = angularVelocity; 
+    this.world.getWorld().addBody(wall.boxBody);
+    this.walls.push(wall);
+};
+
 module.exports = Game;
-},{"./Input.js":2,"./Material.js":3,"./Network.js":4,"./Player.js":5,"./Renderer.js":6,"./Settings.js":7,"./World.js":8}],2:[function(require,module,exports){
+},{"./Input.js":3,"./Network.js":4,"./Renderer.js":5,"./Settings.js":6,"./entities/Player.js":7,"./entities/Wall.js":8,"./world/Material.js":9,"./world/World.js":10}],3:[function(require,module,exports){
 var Input = function(game) {
 	this.trajectory = {
     	startVector: {
@@ -255,16 +277,6 @@ Input.prototype.clickedOnCircle = function(x, y) {
 // Trajectory method here?
 
 module.exports = Input;
-},{}],3:[function(require,module,exports){
-var Material = function() {
-    this.ballMaterial = new p2.Material();
-};
-
-Material.prototype.getBallMaterial = function() {
-    return this.ballMaterial;
-};
-
-module.exports = Material;
 },{}],4:[function(require,module,exports){
 var Network = function(game) {
     this.game = game;
@@ -286,6 +298,7 @@ Network.prototype.tryConnect = function() {
 
 Network.prototype.connected = function() {
     this.getPlayers();
+    this.getWalls();
     this.getWorldDetails();
     this.addMainPlayer();
     this.addNewPlayer();
@@ -303,6 +316,18 @@ Network.prototype.getPlayers = function() {
             self.game.addPlayer(playersData[i].id, playersData[i].position[0], playersData[i].position[1]);
             self.game.players[i].circleBody.velocity = playersData[i].velocity;
             self.game.players[i].circleBody.angularVelocity = playersData[i].angularVelocity;
+        }
+    });
+};
+
+Network.prototype.getWalls = function() {
+    var self = this;
+
+    this.socket.emit('getWalls', null);
+
+    this.socket.on('getWalls', function(wallsData) {
+        for (var i = 0; i < wallsData.length; i++) {
+            self.game.addWall(wallsData[i].position[0], wallsData[i].position[1], wallsData[i].velocity, wallsData[i].angularVelocity, wallsData[i].angle);
         }
     });
 };
@@ -374,7 +399,92 @@ Network.prototype.setTrajectory = function(x, y) {
 
 module.exports = Network;
 },{}],5:[function(require,module,exports){
-var Settings = require('./Settings.js');
+var Renderer = function(game, settings) {
+    this.game = game;
+    this.settings = settings;
+    this.renderer;
+    this.container;
+    this.zoom = 40;
+
+    this.initRenderer();
+    this.initContainer();
+    this.windowResize();
+};
+
+Renderer.prototype.initRenderer = function() {
+    var width = 1920;
+    var height = 1080;
+    
+    this.renderer = PIXI.autoDetectRenderer(width, height);
+    this.ratio = width / height;
+
+    this.resize(); // Resize the render according to the client's screen
+    
+    // Add the renderer to the document
+    this.renderer.view.style.display = "block";
+    document.body.appendChild(this.renderer.view);
+};
+
+Renderer.prototype.initContainer = function() {
+    this.container = new PIXI.Container();
+    this.container.position.x = this.renderer.width / 2;
+    this.container.position.y = this.renderer.height / 2;
+    
+    this.container.scale.x = this.zoom;
+    this.container.scale.y = -this.zoom; // Flip to behave like the physics engine
+    window.container = this.container; // For debugging purposes only
+    window.renderer = this.renderer; // For debugging purposes only
+};
+
+Renderer.prototype.resize = function() {
+    if (window.innerWidth / window.innerHeight < this.ratio) {
+        this.renderer.view.style.width = window.innerWidth;
+        this.renderer.view.style.height = window.innerWidth / this.ratio;
+    } else {
+        this.renderer.view.style.width = window.innerHeight * this.ratio;
+        this.renderer.view.style.height = window.innerHeight;
+    }
+};
+
+Renderer.prototype.windowResize = function() {
+    var self = this;
+   
+    window.onresize = function(event) {
+        self.resize();
+    };
+};
+
+Renderer.prototype.render = function() {
+    // Draw all players
+    for (var i = 0; i < this.game.players.length; i++) {
+        this.game.players[i].draw();
+
+        if (this.settings.showServerPosition)
+            this.game.players[i].drawShadow();
+    }
+
+    // Draw all walls
+    for (var i = 0; i < this.game.walls.length; i++) {
+        this.game.walls[i].draw();
+    }    
+
+    // Restore transform
+    this.renderer.render(this.container);
+};
+
+Renderer.prototype.getLocalMousePosition = function() {
+    return this.renderer.plugins.interaction.mouse.getLocalPosition(this.container);
+};
+
+module.exports = Renderer;
+},{}],6:[function(require,module,exports){
+var Settings = function() {
+    this.showServerPosition = true;
+};
+
+module.exports = Settings;
+},{}],7:[function(require,module,exports){
+var Settings = require('../Settings.js');
 
 var Player = function(id, x, y, renderer, material, input) {
     this.id = id;
@@ -458,87 +568,61 @@ Player.prototype.createHitArea = function () {
 };
 
 module.exports = Player;
-},{"./Settings.js":7}],6:[function(require,module,exports){
-var Renderer = function(players, settings) {
-    this.players = players;
-    this.settings = settings;
-    this.renderer;
-    this.container;
-    this.zoom = 20;
+},{"../Settings.js":6}],8:[function(require,module,exports){
+var Wall = function(renderer, material) {
+    this.renderer = renderer;
+    this.boxShape;
+    this.boxBody;
+    this.graphics;
 
-    this.initRenderer();
-    this.initContainer();
-    this.windowResize();
+    this.initShape(material);
+    this.initBody();
+    this.createGraphics();
 };
 
-Renderer.prototype.initRenderer = function() {
-    var width = 1920;
-    var height = 1080;
-    
-    this.renderer = PIXI.autoDetectRenderer(width, height);
-    this.ratio = width / height;
-
-    this.resize(); // Resize the render according to the client's screen
-    
-    // Add the renderer to the document
-    this.renderer.view.style.display = "block";
-    document.body.appendChild(this.renderer.view);
+Wall.prototype.initShape = function(material) {
+    this.boxShape = new p2.Box({width: 2, height: 1, material: material});
 };
 
-Renderer.prototype.initContainer = function() {
-    this.container = new PIXI.Container();
-    this.container.position.x = this.renderer.width / 2;
-    this.container.position.y = this.renderer.height / 2;
-    
-    this.container.scale.x = this.zoom;
-    this.container.scale.y = -this.zoom; // Flip to behave like the physics engine
-    window.container = this.container; // For debugging purposes only
-    window.renderer = this.renderer; // For debugging purposes only
+Wall.prototype.initBody = function() {
+    this.boxBody = new p2.Body({
+        mass: 15,
+        position: [0,2],
+        angularDamping:.8
+    });
+    this.boxBody.damping = .8;
+    this.boxBody.allowSleep = true;
+    this.boxBody.sleepSpeedLimit = 1;
+    this.boxBody.sleepTimeLimit = 1;
+    this.boxBody.addShape(this.boxShape);
 };
 
-Renderer.prototype.resize = function() {
-    if (window.innerWidth / window.innerHeight < this.ratio) {
-        this.renderer.view.style.width = window.innerWidth;
-        this.renderer.view.style.height = window.innerWidth / this.ratio;
-    } else {
-        this.renderer.view.style.width = window.innerHeight * this.ratio;
-        this.renderer.view.style.height = window.innerHeight;
-    }
+Wall.prototype.createGraphics = function() {
+    this.graphics = new PIXI.Graphics();
+    this.graphics.beginFill(0xff0000);
+    this.graphics.drawRect(-this.boxShape.width/2, -this.boxShape.height/2, this.boxShape.width, this.boxShape.height);
+
+    this.renderer.container.addChild(this.graphics);
 };
 
-Renderer.prototype.windowResize = function() {
-    var self = this;
-   
-    window.onresize = function(event) {
-        self.resize();
-    };
+Wall.prototype.draw = function() {
+    this.graphics.position.x = this.boxBody.position[0];
+    this.graphics.position.y = this.boxBody.position[1];
+    this.graphics.rotation = this.boxBody.angle;
 };
 
-Renderer.prototype.render = function() {
-    // Draw all bodies
-    for (var i = 0; i < this.players.length; i++) {
-        this.players[i].draw();
-
-        if (this.settings.showServerPosition)
-            this.players[i].drawShadow();
-    }
-
-    // Restore transform
-    this.renderer.render(this.container);
+module.exports = Wall;
+},{}],9:[function(require,module,exports){
+var Material = function() {
+    this.ballMaterial = new p2.Material();
 };
 
-Renderer.prototype.getLocalMousePosition = function() {
-    return this.renderer.plugins.interaction.mouse.getLocalPosition(this.container);
+Material.prototype.getBallMaterial = function() {
+    return this.ballMaterial;
 };
 
-module.exports = Renderer;
-},{}],7:[function(require,module,exports){
-var Settings = function() {
-    this.showServerPosition = true;
-};
-
-module.exports = Settings;
-},{}],8:[function(require,module,exports){
+module.exports = Material;
+},{}],10:[function(require,module,exports){
 var World = function(material) {
     this.world = new p2.World({ gravity: [0, 0] });
     this.world.frictionGravity = 1;
@@ -559,12 +643,4 @@ World.prototype.getWorld = function() {
 };
 
 module.exports = World;
-},{}],9:[function(require,module,exports){
-var Game = require('./Game.js');
-
-(function() {
-    var game = new Game();
-    window.game = game; // For debugging only
-})();
-
-},{"./Game.js":1}]},{},[9]);
+},{}]},{},[1]);

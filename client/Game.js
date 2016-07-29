@@ -1,8 +1,9 @@
 var Input = require('./Input.js');
 var Network = require('./Network.js');
-var Material = require('./Material.js');
-var World = require('./World.js');
-var Player = require('./Player.js');
+var Material = require('./world/Material.js');
+var World = require('./world/World.js');
+var Player = require('./entities/Player.js');
+var Wall = require('./entities/Wall.js');
 var Settings = require('./Settings.js');
 var Renderer = require('./Renderer.js');
 
@@ -30,6 +31,8 @@ var Game = function() {
      * @type {Array of type Player}
      */
     this.players = [];
+
+    this.walls = [];
     
     /**
      * The material object, which holds the materials for the current game.
@@ -53,7 +56,7 @@ var Game = function() {
      * The Renderer object.
      * @type {Renderer}
      */
-    this.renderer = new Renderer(this.players, this.settings);
+    this.renderer = new Renderer(this, this.settings);
 
     /**
      * The id of the player performing an action on postStep.
@@ -207,6 +210,17 @@ Game.prototype.moveTo = function(id,x,y) {
 
 Game.prototype.drawTrajectory = function(x, y) {
     
+};
+
+Game.prototype.addWall = function(x, y, velocity, angularVelocity, angle) {
+    var wall = new Wall(this.renderer, this.material.getBallMaterial());
+    wall.boxBody.position[0] = x;
+    wall.boxBody.position[1] = y;
+    wall.boxBody.angle = angle;
+    wall.boxBody.velocity = velocity;
+    wall.boxBody.angularVelocity = angularVelocity; 
+    this.world.getWorld().addBody(wall.boxBody);
+    this.walls.push(wall);
 };
 
 module.exports = Game;

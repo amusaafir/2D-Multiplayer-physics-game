@@ -24,6 +24,16 @@ Network.prototype.connect = function() {
             socket.emit('getPlayers', data);
         });
 
+        socket.on('getWalls', function() {
+            var data = [];
+
+            for (var i = 0; i < network.game.walls.length; i++) {
+                data.push(network.game.walls[i].getClientDetails());
+            }
+
+            socket.emit('getWalls', data);
+        });
+
         socket.on('getWorldDetails', function() {
             var data = {
                 time: network.game.world.time

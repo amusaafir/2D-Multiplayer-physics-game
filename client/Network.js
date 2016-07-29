@@ -18,6 +18,7 @@ Network.prototype.tryConnect = function() {
 
 Network.prototype.connected = function() {
     this.getPlayers();
+    this.getWalls();
     this.getWorldDetails();
     this.addMainPlayer();
     this.addNewPlayer();
@@ -35,6 +36,18 @@ Network.prototype.getPlayers = function() {
             self.game.addPlayer(playersData[i].id, playersData[i].position[0], playersData[i].position[1]);
             self.game.players[i].circleBody.velocity = playersData[i].velocity;
             self.game.players[i].circleBody.angularVelocity = playersData[i].angularVelocity;
+        }
+    });
+};
+
+Network.prototype.getWalls = function() {
+    var self = this;
+
+    this.socket.emit('getWalls', null);
+
+    this.socket.on('getWalls', function(wallsData) {
+        for (var i = 0; i < wallsData.length; i++) {
+            self.game.addWall(wallsData[i].position[0], wallsData[i].position[1], wallsData[i].velocity, wallsData[i].angularVelocity, wallsData[i].angle);
         }
     });
 };
