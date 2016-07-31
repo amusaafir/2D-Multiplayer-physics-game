@@ -34,8 +34,8 @@ Network.prototype.getPlayers = function() {
     this.socket.on('getPlayers', function(playersData) {
         for (var i = 0; i < playersData.length; i++) {
             self.game.addPlayer(playersData[i].id, playersData[i].position[0], playersData[i].position[1]);
-            self.game.players[i].circleBody.velocity = playersData[i].velocity;
-            self.game.players[i].circleBody.angularVelocity = playersData[i].angularVelocity;
+            self.game.players[i].marble.circleBody.velocity = playersData[i].velocity;
+            self.game.players[i].marble.circleBody.angularVelocity = playersData[i].angularVelocity;
         }
     });
 };
@@ -86,10 +86,8 @@ Network.prototype.receiveState = function() {
 
     this.socket.on('state', function(playersData) {
         for (var i = 0; i < self.game.players.length; i++) {
-            //players[i].circleBody.position = playersData[i].position;
-            //players[i].circleBody.velocity = playersData[i].velocity;
-            self.game.players[i].shadowX = playersData[i].position[0];
-            self.game.players[i].shadowY = playersData[i].position[1];
+            self.game.players[i].marble.shadowX = playersData[i].position[0];
+            self.game.players[i].marble.shadowY = playersData[i].position[1];
         }
     });
 };

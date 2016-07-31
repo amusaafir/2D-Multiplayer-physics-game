@@ -140,11 +140,13 @@ Game.prototype.draw = function() {
  * @param {[Number]} y  [The y starting position.]
  */
 Game.prototype.addPlayer = function(id, x, y, isMainplayer) {
-    var player = new Player(id, x, y, this.renderer, this.material.getBallMaterial());
+    var player = new Player(id);
+    var input = null;
     if(isMainplayer) {
-        player.input = this.input;
+        input = this.input;
     }
-    this.world.getWorld().addBody(player.circleBody);
+    player.addMarble(id, x, y, this.renderer, this.material.getBallMaterial(), input);
+    this.world.getWorld().addBody(player.marble.circleBody);
     this.players.push(player);
 };
 
@@ -157,7 +159,7 @@ Game.prototype.postStep = function() {
 
     this.world.getWorld().on("postStep", function() {
         if (self.request) {
-            self.players[self.currentId].circleBody.applyForce([self.currentX, self.currentY], self.players[self.currentId].circleBody.position);
+            self.players[self.currentId].marble.circleBody.applyForce([self.currentX, self.currentY], self.players[self.currentId].marble.circleBody.position);
             self.request = false;
         }
     });
@@ -187,12 +189,12 @@ Game.prototype.trajectory = function(x, y) {
  */
 Game.prototype.arePositionsSynced = function() {
     for (var i = 0; i < this.players.length; i++) {
-        if (this.players[i].circleBody.position[0] != this.players[i].shadowX) {
-            console.log('X not equal for ' + i + ', client: ' + this.players[i].circleBody.position[0] + '; server ' + this.players[i].shadowX);
+        if (this.players[i].marble.circleBody.position[0] != this.players[i].marble.shadowX) {
+            console.log('X not equal for ' + i + ', client: ' + this.players[i].marble.circleBody.position[0] + '; server ' + this.players[i].marble.shadowX);
         }
 
-        if (this.players[i].circleBody.position[1] != this.players[i].shadowY) {
-            console.log('Y not equal for ' + i + ', client: ' + this.players[i].circleBody.position[1] + '; server ' + this.players[i].shadowY);
+        if (this.players[i].marble.circleBody.position[1] != this.players[i].marble.shadowY) {
+            console.log('Y not equal for ' + i + ', client: ' + this.players[i].marble.circleBody.position[1] + '; server ' + this.players[i].marble.shadowY);
         }
     }
 };
@@ -202,19 +204,19 @@ Game.prototype.arePositionsSynced = function() {
  */
 Game.prototype.syncPositions = function() {
     for (var i = 0; i < this.players.length; i++) {
-        this.players[i].circleBody.position = [this.players[i].shadowX, this.players[i].shadowY];
+        this.players[i].marble.circleBody.position = [this.players[i].marble.shadowX, this.players[i].marble.shadowY];
     }
 };
 
 Game.prototype.printLocalPositions = function() {
     for (var i = 0; i < this.players.length; i++) {
-        console.log(this.players[i].circleBody.position[0] + ', ' + this.players[i].circleBody.position[1]);
+        console.log(this.players[i].marble.circleBody.position[0] + ', ' + this.players[i].marble.circleBody.position[1]);
     }
 };
 
 Game.prototype.moveTo = function(id,x,y) {
-    this.players[id].circleBody.position[0] = x;
-    this.players[id].circleBody.position[1] = y;
+    this.players[id].marble.circleBody.position[0] = x;
+    this.players[id].marble.circleBody.position[1] = y;
 };
 
 Game.prototype.drawTrajectory = function(x, y) {
@@ -233,7 +235,7 @@ Game.prototype.addWall = function(x, y, velocity, angularVelocity, angle) {
 };
 
 module.exports = Game;
-},{"./Input.js":3,"./Network.js":4,"./Renderer.js":5,"./Settings.js":6,"./entities/Player.js":7,"./entities/Wall.js":8,"./world/Material.js":9,"./world/World.js":10}],3:[function(require,module,exports){
+},{"./Input.js":3,"./Network.js":4,"./Renderer.js":5,"./Settings.js":6,"./entities/Player.js":8,"./entities/Wall.js":9,"./world/Material.js":10,"./world/World.js":11}],3:[function(require,module,exports){
 var Input = function(game) {
 	this.trajectory = {
     	startVector: {
@@ -314,8 +316,8 @@ Network.prototype.getPlayers = function() {
     this.socket.on('getPlayers', function(playersData) {
         for (var i = 0; i < playersData.length; i++) {
             self.game.addPlayer(playersData[i].id, playersData[i].position[0], playersData[i].position[1]);
-            self.game.players[i].circleBody.velocity = playersData[i].velocity;
-            self.game.players[i].circleBody.angularVelocity = playersData[i].angularVelocity;
+            self.game.players[i].marble.circleBody.velocity = playersData[i].velocity;
+            self.game.players[i].marble.circleBody.angularVelocity = playersData[i].angularVelocity;
         }
     });
 };
@@ -366,10 +368,8 @@ Network.prototype.receiveState = function() {
 
     this.socket.on('state', function(playersData) {
         for (var i = 0; i < self.game.players.length; i++) {
-            //players[i].circleBody.position = playersData[i].position;
-            //players[i].circleBody.velocity = playersData[i].velocity;
-            self.game.players[i].shadowX = playersData[i].position[0];
-            self.game.players[i].shadowY = playersData[i].position[1];
+            self.game.players[i].marble.shadowX = playersData[i].position[0];
+            self.game.players[i].marble.shadowY = playersData[i].position[1];
         }
     });
 };
@@ -457,10 +457,10 @@ Renderer.prototype.windowResize = function() {
 Renderer.prototype.render = function() {
     // Draw all players
     for (var i = 0; i < this.game.players.length; i++) {
-        this.game.players[i].draw();
+        this.game.players[i].marble.draw();
 
         if (this.settings.showServerPosition)
-            this.game.players[i].drawShadow();
+            this.game.players[i].marble.drawShadow();
     }
 
     // Draw all walls
@@ -486,7 +486,7 @@ module.exports = Settings;
 },{}],7:[function(require,module,exports){
 var Settings = require('../Settings.js');
 
-var Player = function(id, x, y, renderer, material, input) {
+var Marble = function(id, x, y, renderer, material, input) {
     this.id = id;
     this.circleShape;
     this.circleBody;
@@ -501,14 +501,14 @@ var Player = function(id, x, y, renderer, material, input) {
     this.createHitArea();
 };
 
-Player.prototype.initCircleShape = function(material) {
+Marble.prototype.initCircleShape = function(material) {
     this.circleShape = new p2.Circle({
         radius: 1,
         material: material
     });
 };
 
-Player.prototype.initPhysicsBody = function(x, y) {
+Marble.prototype.initPhysicsBody = function(x, y) {
     this.circleBody = new p2.Body({
         mass: 1,
         position: [x, y],
@@ -521,15 +521,15 @@ Player.prototype.initPhysicsBody = function(x, y) {
     this.circleBody.sleepTimeLimit = 1;
 };
 
-Player.prototype.draw = function() {
+Marble.prototype.draw = function() {
     this.graphics.position.set(this.circleBody.position[0], this.circleBody.position[1]);
 };
 
-Player.prototype.drawShadow = function() {
+Marble.prototype.drawShadow = function() {
     this.shadow.position.set(this.shadowX, this.shadowY);
 };
 
-Player.prototype.createGraphics = function() {
+Marble.prototype.createGraphics = function() {
     this.graphics = new PIXI.Graphics();
     this.graphics.lineStyle(0);
     this.graphics.beginFill(0xFFFFFF, 1);
@@ -548,7 +548,7 @@ Player.prototype.createGraphics = function() {
     }
 };
 
-Player.prototype.createHitArea = function () {
+Marble.prototype.createHitArea = function () {
     var self = this;
 
     this.graphics.interactive = true;
@@ -567,8 +567,26 @@ Player.prototype.createHitArea = function () {
     };
 };
 
-module.exports = Player;
+module.exports = Marble;
 },{"../Settings.js":6}],8:[function(require,module,exports){
+var Marble = require('./Marble.js');
+
+var Player = function(id) {
+	this.id = id;
+	this.marble;
+};
+
+// TODO: Create it when a list of marbles exist
+Player.prototype.drawMarbles = function() {
+
+};
+
+Player.prototype.addMarble = function(id, x, y, renderer, material, input) {
+	this.marble = new Marble(id, x, y, renderer, material, input);
+};
+
+module.exports = Player;
+},{"./Marble.js":7}],9:[function(require,module,exports){
 var Wall = function(renderer, material) {
     this.renderer = renderer;
     this.boxShape;
@@ -612,7 +630,7 @@ Wall.prototype.draw = function() {
 };
 
 module.exports = Wall;
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var Material = function() {
     this.ballMaterial = new p2.Material();
 };
@@ -622,7 +640,7 @@ Material.prototype.getBallMaterial = function() {
 };
 
 module.exports = Material;
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var World = function(material) {
     this.world = new p2.World({ gravity: [0, 0] });
     this.world.frictionGravity = 1;
