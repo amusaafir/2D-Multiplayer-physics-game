@@ -12,7 +12,6 @@ function Game(io) {
     this.positions = [];
     this.material = new Material();
     this.world = new World(this.material);
-
     
     this.loadScenery(); // TODO: Create separate 'scene' object
     this.run();
@@ -64,7 +63,7 @@ Game.prototype.sendState = function() {
         var clientDetails = [];
 
         for (var i = 0; i < self.players.length; i++) {
-            clientDetails.push(self.players[i].getClientDetails());
+            clientDetails.push(self.players[i].marble.getClientDetails());
         }
 
         if (self.io) {
@@ -78,7 +77,7 @@ Game.prototype.postStep = function() {
 
     this.world.world.on("postStep", function() {
         if (self.request) {
-            self.players[self.currentId].circleBody.applyForce([self.currentX, self.currentY], self.players[self.currentId].circleBody.position);
+            self.players[self.currentId].marble.circleBody.applyForce([self.currentX, self.currentY], self.players[self.currentId].marble.circleBody.position);
             self.request = false;
         }
     });
@@ -87,8 +86,9 @@ Game.prototype.postStep = function() {
 Game.prototype.addPlayer = function() {
     var id = this.players.length;
     var startPosition = this.positions.pop();
-    var player = new Player(id, startPosition, this.material.getBallMaterial());
-    this.world.world.addBody(player.circleBody);
+    var player = new Player(id);
+    player.addMarble(id, startPosition, this.material.getBallMaterial());
+    this.world.world.addBody(player.marble.circleBody);
     this.players.push(player);
 
     return player;
