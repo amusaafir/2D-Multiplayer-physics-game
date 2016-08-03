@@ -34,8 +34,9 @@ Network.prototype.getPlayers = function() {
     this.socket.on('getPlayers', function(playersData) {
         for (var i = 0; i < playersData.length; i++) {
             self.game.addPlayer(playersData[i].id, playersData[i].position[0], playersData[i].position[1]);
-            self.game.players[i].marble.circleBody.velocity = playersData[i].velocity;
-            self.game.players[i].marble.circleBody.angularVelocity = playersData[i].angularVelocity;
+            var marblesContext = self.game.players[i].marbles;
+            marblesContext[marblesContext.length-1].circleBody.velocity = playersData[i].velocity;
+            marblesContext[marblesContext.length-1].circleBody.angularVelocity = playersData[i].angularVelocity;
         }
     });
 };
@@ -86,8 +87,9 @@ Network.prototype.receiveState = function() {
 
     this.socket.on('state', function(playersData) {
         for (var i = 0; i < self.game.players.length; i++) {
-            self.game.players[i].marble.shadowX = playersData[i].position[0];
-            self.game.players[i].marble.shadowY = playersData[i].position[1];
+            var marblesContext = self.game.players[i].marbles;
+            marblesContext[marblesContext.length-1].shadowX = playersData[i].position[0];
+            marblesContext[marblesContext.length-1].shadowY = playersData[i].position[1];
         }
     });
 };

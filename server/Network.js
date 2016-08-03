@@ -18,7 +18,8 @@ Network.prototype.connect = function() {
             var data = [];
 
             for (var i = 0; i < network.game.players.length; i++) {
-                data.push(network.game.players[i].marble.getClientDetails());
+                var marblesContext = network.game.players[i].marbles;
+                data.push(marblesContext[marblesContext.length-1].getClientDetails());
             }
 
             socket.emit('getPlayers', data);
@@ -45,8 +46,9 @@ Network.prototype.connect = function() {
         // TODO: Add add player logic inside the game class
         socket.on('addMainPlayer', function() {
             var player = network.game.addPlayer();
-            self.sockets.connected[socket.id].emit('addMainPlayer', player.marble.getClientDetails());
-            socket.broadcast.emit('addNewPlayer', player.marble.getClientDetails());
+            var marblesContext = player.marbles;
+            self.sockets.connected[socket.id].emit('addMainPlayer', marblesContext[marblesContext.length-1].getClientDetails());
+            socket.broadcast.emit('addNewPlayer', marblesContext[marblesContext.length-1].getClientDetails());
         });
 
         socket.on('impulse', function(data) {

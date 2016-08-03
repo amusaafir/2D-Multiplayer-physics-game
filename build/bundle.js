@@ -146,7 +146,7 @@ Game.prototype.addPlayer = function(id, x, y, isMainplayer) {
         input = this.input;
     }
     player.addMarble(id, x, y, this.renderer, this.material.getBallMaterial(), input);
-    this.world.getWorld().addBody(player.marble.circleBody);
+    this.world.getWorld().addBody(player.marbles[player.marbles.length-1].circleBody);
     this.players.push(player);
 };
 
@@ -159,7 +159,8 @@ Game.prototype.postStep = function() {
 
     this.world.getWorld().on("postStep", function() {
         if (self.request) {
-            self.players[self.currentId].marble.circleBody.applyForce([self.currentX, self.currentY], self.players[self.currentId].marble.circleBody.position);
+            var marblesContext = self.players[self.currentId].marbles;
+            marblesContext[marblesContext.length-1].circleBody.applyForce([self.currentX, self.currentY], marblesContext[marblesContext.length-1].circleBody.position);
             self.request = false;
         }
     });
@@ -189,13 +190,13 @@ Game.prototype.trajectory = function(x, y) {
  */
 Game.prototype.arePositionsSynced = function() {
     for (var i = 0; i < this.players.length; i++) {
-        if (this.players[i].marble.circleBody.position[0] != this.players[i].marble.shadowX) {
+        /*if (this.players[i].marble.circleBody.position[0] != this.players[i].marble.shadowX) {
             console.log('X not equal for ' + i + ', client: ' + this.players[i].marble.circleBody.position[0] + '; server ' + this.players[i].marble.shadowX);
         }
 
         if (this.players[i].marble.circleBody.position[1] != this.players[i].marble.shadowY) {
             console.log('Y not equal for ' + i + ', client: ' + this.players[i].marble.circleBody.position[1] + '; server ' + this.players[i].marble.shadowY);
-        }
+        }*/
     }
 };
 
@@ -204,19 +205,19 @@ Game.prototype.arePositionsSynced = function() {
  */
 Game.prototype.syncPositions = function() {
     for (var i = 0; i < this.players.length; i++) {
-        this.players[i].marble.circleBody.position = [this.players[i].marble.shadowX, this.players[i].marble.shadowY];
+        //this.players[i].marble.circleBody.position = [this.players[i].marble.shadowX, this.players[i].marble.shadowY];
     }
 };
 
 Game.prototype.printLocalPositions = function() {
     for (var i = 0; i < this.players.length; i++) {
-        console.log(this.players[i].marble.circleBody.position[0] + ', ' + this.players[i].marble.circleBody.position[1]);
+        //console.log(this.players[i].marble.circleBody.position[0] + ', ' + this.players[i].marble.circleBody.position[1]);
     }
 };
 
 Game.prototype.moveTo = function(id,x,y) {
-    this.players[id].marble.circleBody.position[0] = x;
-    this.players[id].marble.circleBody.position[1] = y;
+    //this.players[id].marble.circleBody.position[0] = x;
+    //this.players[id].marble.circleBody.position[1] = y;
 };
 
 Game.prototype.drawTrajectory = function(x, y) {
@@ -316,8 +317,9 @@ Network.prototype.getPlayers = function() {
     this.socket.on('getPlayers', function(playersData) {
         for (var i = 0; i < playersData.length; i++) {
             self.game.addPlayer(playersData[i].id, playersData[i].position[0], playersData[i].position[1]);
-            self.game.players[i].marble.circleBody.velocity = playersData[i].velocity;
-            self.game.players[i].marble.circleBody.angularVelocity = playersData[i].angularVelocity;
+            var marblesContext = self.game.players[i].marbles;
+            marblesContext[marblesContext.length-1].circleBody.velocity = playersData[i].velocity;
+            marblesContext[marblesContext.length-1].circleBody.angularVelocity = playersData[i].angularVelocity;
         }
     });
 };
@@ -368,8 +370,9 @@ Network.prototype.receiveState = function() {
 
     this.socket.on('state', function(playersData) {
         for (var i = 0; i < self.game.players.length; i++) {
-            self.game.players[i].marble.shadowX = playersData[i].position[0];
-            self.game.players[i].marble.shadowY = playersData[i].position[1];
+            var marblesContext = self.game.players[i].marbles;
+            marblesContext[marblesContext.length-1].shadowX = playersData[i].position[0];
+            marblesContext[marblesContext.length-1].shadowY = playersData[i].position[1];
         }
     });
 };
@@ -457,10 +460,11 @@ Renderer.prototype.windowResize = function() {
 Renderer.prototype.render = function() {
     // Draw all players
     for (var i = 0; i < this.game.players.length; i++) {
-        this.game.players[i].marble.draw();
+        var marblesContext = this.game.players[i].marbles; 
+        marblesContext[marblesContext.length-1].draw();
 
         if (this.settings.showServerPosition)
-            this.game.players[i].marble.drawShadow();
+            marblesContext[marblesContext.length-1].drawShadow();
     }
 
     // Draw all walls
@@ -479,7 +483,7 @@ Renderer.prototype.getLocalMousePosition = function() {
 module.exports = Renderer;
 },{}],6:[function(require,module,exports){
 var Settings = function() {
-    this.showServerPosition = true;
+    this.showServerPosition = false;
 };
 
 module.exports = Settings;
@@ -573,7 +577,7 @@ var Marble = require('./Marble.js');
 
 var Player = function(id) {
 	this.id = id;
-	this.marble;
+	this.marbles = [];
 };
 
 // TODO: Create it when a list of marbles exist
@@ -582,7 +586,7 @@ Player.prototype.drawMarbles = function() {
 };
 
 Player.prototype.addMarble = function(id, x, y, renderer, material, input) {
-	this.marble = new Marble(id, x, y, renderer, material, input);
+	this.marbles.push(new Marble(id, x, y, renderer, material, input));
 };
 
 module.exports = Player;
