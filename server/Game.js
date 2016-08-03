@@ -63,7 +63,8 @@ Game.prototype.sendState = function() {
         var clientDetails = [];
 
         for (var i = 0; i < self.players.length; i++) {
-            clientDetails.push(self.players[i].marble.getClientDetails());
+            var marblesContext = self.players[i].marbles;
+            clientDetails.push(marblesContext[marblesContext.length-1].getClientDetails());
         }
 
         if (self.io) {
@@ -77,7 +78,8 @@ Game.prototype.postStep = function() {
 
     this.world.world.on("postStep", function() {
         if (self.request) {
-            self.players[self.currentId].marble.circleBody.applyForce([self.currentX, self.currentY], self.players[self.currentId].marble.circleBody.position);
+            var marblesContext = self.players[self.currentId].marbles;
+            marblesContext[marblesContext.length-1].circleBody.applyForce([self.currentX, self.currentY], marblesContext[marblesContext.length-1].circleBody.position);
             self.request = false;
         }
     });
@@ -88,7 +90,8 @@ Game.prototype.addPlayer = function() {
     var startPosition = this.positions.pop();
     var player = new Player(id);
     player.addMarble(id, startPosition, this.material.getBallMaterial());
-    this.world.world.addBody(player.marble.circleBody);
+    var marblesContext = player.marbles;
+    this.world.world.addBody(marblesContext[marblesContext.length-1].circleBody);
     this.players.push(player);
 
     return player;

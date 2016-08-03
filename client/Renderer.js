@@ -56,10 +56,11 @@ Renderer.prototype.windowResize = function() {
 Renderer.prototype.render = function() {
     // Draw all players
     for (var i = 0; i < this.game.players.length; i++) {
-        this.game.players[i].marble.draw();
+        var marblesContext = this.game.players[i].marbles; 
+        marblesContext[marblesContext.length-1].draw();
 
         if (this.settings.showServerPosition)
-            this.game.players[i].marble.drawShadow();
+            marblesContext[marblesContext.length-1].drawShadow();
     }
 
     // Draw all walls

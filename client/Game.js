@@ -137,7 +137,7 @@ Game.prototype.addPlayer = function(id, x, y, isMainplayer) {
         input = this.input;
     }
     player.addMarble(id, x, y, this.renderer, this.material.getBallMaterial(), input);
-    this.world.getWorld().addBody(player.marble.circleBody);
+    this.world.getWorld().addBody(player.marbles[player.marbles.length-1].circleBody);
     this.players.push(player);
 };
 
@@ -150,7 +150,8 @@ Game.prototype.postStep = function() {
 
     this.world.getWorld().on("postStep", function() {
         if (self.request) {
-            self.players[self.currentId].marble.circleBody.applyForce([self.currentX, self.currentY], self.players[self.currentId].marble.circleBody.position);
+            var marblesContext = self.players[self.currentId].marbles;
+            marblesContext[marblesContext.length-1].circleBody.applyForce([self.currentX, self.currentY], marblesContext[marblesContext.length-1].circleBody.position);
             self.request = false;
         }
     });
@@ -180,13 +181,13 @@ Game.prototype.trajectory = function(x, y) {
  */
 Game.prototype.arePositionsSynced = function() {
     for (var i = 0; i < this.players.length; i++) {
-        if (this.players[i].marble.circleBody.position[0] != this.players[i].marble.shadowX) {
+        /*if (this.players[i].marble.circleBody.position[0] != this.players[i].marble.shadowX) {
             console.log('X not equal for ' + i + ', client: ' + this.players[i].marble.circleBody.position[0] + '; server ' + this.players[i].marble.shadowX);
         }
 
         if (this.players[i].marble.circleBody.position[1] != this.players[i].marble.shadowY) {
             console.log('Y not equal for ' + i + ', client: ' + this.players[i].marble.circleBody.position[1] + '; server ' + this.players[i].marble.shadowY);
-        }
+        }*/
     }
 };
 
@@ -195,19 +196,19 @@ Game.prototype.arePositionsSynced = function() {
  */
 Game.prototype.syncPositions = function() {
     for (var i = 0; i < this.players.length; i++) {
-        this.players[i].marble.circleBody.position = [this.players[i].marble.shadowX, this.players[i].marble.shadowY];
+        //this.players[i].marble.circleBody.position = [this.players[i].marble.shadowX, this.players[i].marble.shadowY];
     }
 };
 
 Game.prototype.printLocalPositions = function() {
     for (var i = 0; i < this.players.length; i++) {
-        console.log(this.players[i].marble.circleBody.position[0] + ', ' + this.players[i].marble.circleBody.position[1]);
+        //console.log(this.players[i].marble.circleBody.position[0] + ', ' + this.players[i].marble.circleBody.position[1]);
     }
 };
 
 Game.prototype.moveTo = function(id,x,y) {
-    this.players[id].marble.circleBody.position[0] = x;
-    this.players[id].marble.circleBody.position[1] = y;
+    //this.players[id].marble.circleBody.position[0] = x;
+    //this.players[id].marble.circleBody.position[1] = y;
 };
 
 Game.prototype.drawTrajectory = function(x, y) {
