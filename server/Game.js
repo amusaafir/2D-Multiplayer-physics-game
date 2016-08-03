@@ -87,11 +87,13 @@ Game.prototype.postStep = function() {
 
 Game.prototype.addPlayer = function() {
     var id = this.players.length;
-    var startPosition = this.positions.pop();
     var player = new Player(id);
-    player.addMarble(id, startPosition, this.material.getBallMaterial());
-    var marblesContext = player.marbles;
-    this.world.world.addBody(marblesContext[marblesContext.length-1].circleBody);
+
+    // Add a marble
+    player.addMarble(id, this.positions.pop(), this.material.getBallMaterial(), this.world.world);
+    // Add another marble (this will not be shown since this is not being sent yet to the client)
+    player.addMarble(id, this.positions.pop(), this.material.getBallMaterial(), this.world.world);
+    
     this.players.push(player);
 
     return player;
