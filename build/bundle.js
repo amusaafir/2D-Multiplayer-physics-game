@@ -483,7 +483,7 @@ Renderer.prototype.getLocalMousePosition = function() {
 module.exports = Renderer;
 },{}],6:[function(require,module,exports){
 var Settings = function() {
-    this.showServerPosition = false;
+    this.showServerPosition = true;
 };
 
 module.exports = Settings;

@@ -10,8 +10,24 @@ Player.prototype.drawMarbles = function() {
 
 };
 
-Player.prototype.addMarble = function(id, x, y, renderer, material, input) {
-	this.marbles.push(new Marble(id, x, y, renderer, material, input));
+Player.prototype.addMarble = function(id, position, material, world) {
+	var marble = new Marble(id, position, material);
+	world.addBody(marble.circleBody);
+	this.marbles.push(marble);
+};
+
+Player.prototype.getClientDetails = function() {
+	var clientDetails = {
+		playerId: id,
+		marbles: []
+	};
+
+	// Get marbles
+	for(var i=0; i<marbles.length; i++) {
+		clientDetails.marbles.push(marbles[i].getClientDetails());
+	}
+
+	return clientDetails;
 };
 
 module.exports = Player;
