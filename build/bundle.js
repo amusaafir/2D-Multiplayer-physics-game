@@ -138,16 +138,22 @@ Game.prototype.draw = function() {
  * @param {[Number]} id [The id of the to be added player.]
  * @param {[Number]} x  [The x starting position.]
  * @param {[Number]} y  [The y starting position.]
- */
-Game.prototype.addPlayer = function(id, x, y, isMainplayer) {
+ */ 
+Game.prototype.addPlayer = function(id, marbles, isMainplayer) {
     var player = new Player(id);
     var input = null;
     if(isMainplayer) {
         input = this.input;
     }
-    player.addMarble(id, x, y, this.renderer, this.material.getBallMaterial(), input);
-    this.world.getWorld().addBody(player.marbles[player.marbles.length-1].circleBody);
+
+    for(var i=0; i<marbles.length; i++) {
+        player.addMarble(id, marbles[i].position[0], marbles[i].position[1], this.renderer, this.material.getBallMaterial(), input);
+        this.world.getWorld().addBody(player.marbles[player.marbles.length-1].circleBody); // Add the body of the (last created) marble to the world
+    }
+    
     this.players.push(player);
+
+    return player;
 };
 
 /**
@@ -316,10 +322,12 @@ Network.prototype.getPlayers = function() {
 
     this.socket.on('getPlayers', function(playersData) {
         for (var i = 0; i < playersData.length; i++) {
-            self.game.addPlayer(playersData[i].id, playersData[i].position[0], playersData[i].position[1]);
-            var marblesContext = self.game.players[i].marbles;
-            marblesContext[marblesContext.length-1].circleBody.velocity = playersData[i].velocity;
-            marblesContext[marblesContext.length-1].circleBody.angularVelocity = playersData[i].angularVelocity;
+            var player = self.game.addPlayer(playersData[i].id, playersData[i].marbles, false);
+
+            for(var m=0; m<player.marbles.length; m++) {
+                player.marbles[m].circleBody.velocity = playersData[i].marbles[m].velocity;
+                player.marbles[m].circleBody.angularVelocity = playersData[i].marbles[m].angularVelocity;
+            }
         }
     });
 };
@@ -352,8 +360,9 @@ Network.prototype.addMainPlayer = function() {
     this.socket.emit('addMainPlayer', null);
 
     this.socket.on('addMainPlayer', function(player) {
+        console.log(player);
         self.game.mainPlayerId = player.id;
-        self.game.addPlayer(player.id, player.position[0], player.position[1], true);
+        self.game.addPlayer(player.id, player.marbles, true);
     });
 };
 
@@ -361,18 +370,30 @@ Network.prototype.addNewPlayer = function() {
     var self = this;
 
     this.socket.on('addNewPlayer', function(player) {
-        self.game.addPlayer(player.id, player.position[0], player.position[1], false);
+        self.game.addPlayer(player.id, player.marbles, false);
     });
 };
 
 Network.prototype.receiveState = function() {
     var self = this;
 
-    this.socket.on('state', function(playersData) {
-        for (var i = 0; i < self.game.players.length; i++) {
-            var marblesContext = self.game.players[i].marbles;
-            marblesContext[marblesContext.length-1].shadowX = playersData[i].position[0];
-            marblesContext[marblesContext.length-1].shadowY = playersData[i].position[1];
+    this.socket.on('state', function(playersData) { // List containing clientdata for each player
+        if(playersData.length == self.game.players.length) {
+            for(var i = 0; i < playersData.length; i++) {
+                var playerMarbles = playersData[i].marbles;
+
+                if(playerMarbles.length != playersData[i].marbles.length) {
+                    console.log('Inconsistent marbles for player ' + i);
+                    continue;
+                } else {
+                    for(var m = 0; m < playerMarbles.length; m++) {
+                        self.game.players[i].marbles[m].shadowX = playersData[i].marbles[m].position[0];
+                        self.game.players[i].marbles[m].shadowY = playersData[i].marbles[m].position[1];
+                    }
+                }
+            }
+        } else {
+            console.log('State error: players inconsistent.');
         }
     });
 };
@@ -460,11 +481,7 @@ Renderer.prototype.windowResize = function() {
 Renderer.prototype.render = function() {
     // Draw all players
     for (var i = 0; i < this.game.players.length; i++) {
-        var marblesContext = this.game.players[i].marbles; 
-        marblesContext[marblesContext.length-1].draw();
-
-        if (this.settings.showServerPosition)
-            marblesContext[marblesContext.length-1].drawShadow();
+        this.game.players[i].drawMarbles((this.settings.showServerPosition));
     }
 
     // Draw all walls
@@ -581,11 +598,18 @@ var Player = function(id) {
 };
 
 // TODO: Create it when a list of marbles exist
-Player.prototype.drawMarbles = function() {
+Player.prototype.drawMarbles = function(showServerPosition) {
+	for(var i=0; i<this.marbles.length; i++) {
+		this.marbles[i].draw();
 
+		if(showServerPosition) {
+			this.marbles[i].drawShadow();
+		}
+	}
 };
 
 Player.prototype.addMarble = function(id, x, y, renderer, material, input) {
+	console.log(x + ', '+ y);
 	this.marbles.push(new Marble(id, x, y, renderer, material, input));
 };
 

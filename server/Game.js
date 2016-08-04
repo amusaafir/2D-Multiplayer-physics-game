@@ -63,8 +63,7 @@ Game.prototype.sendState = function() {
         var clientDetails = [];
 
         for (var i = 0; i < self.players.length; i++) {
-            var marblesContext = self.players[i].marbles;
-            clientDetails.push(marblesContext[marblesContext.length-1].getClientDetails());
+            clientDetails.push(self.players[i].getClientDetails());
         }
 
         if (self.io) {
