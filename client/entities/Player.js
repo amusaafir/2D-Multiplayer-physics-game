@@ -6,11 +6,18 @@ var Player = function(id) {
 };
 
 // TODO: Create it when a list of marbles exist
-Player.prototype.drawMarbles = function() {
+Player.prototype.drawMarbles = function(showServerPosition) {
+	for(var i=0; i<this.marbles.length; i++) {
+		this.marbles[i].draw();
 
+		if(showServerPosition) {
+			this.marbles[i].drawShadow();
+		}
+	}
 };
 
 Player.prototype.addMarble = function(id, x, y, renderer, material, input) {
+	console.log(x + ', '+ y);
 	this.marbles.push(new Marble(id, x, y, renderer, material, input));
 };
 

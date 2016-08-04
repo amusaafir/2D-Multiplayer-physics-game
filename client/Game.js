@@ -129,16 +129,22 @@ Game.prototype.draw = function() {
  * @param {[Number]} id [The id of the to be added player.]
  * @param {[Number]} x  [The x starting position.]
  * @param {[Number]} y  [The y starting position.]
- */
-Game.prototype.addPlayer = function(id, x, y, isMainplayer) {
+ */ 
+Game.prototype.addPlayer = function(id, marbles, isMainplayer) {
     var player = new Player(id);
     var input = null;
     if(isMainplayer) {
         input = this.input;
     }
-    player.addMarble(id, x, y, this.renderer, this.material.getBallMaterial(), input);
-    this.world.getWorld().addBody(player.marbles[player.marbles.length-1].circleBody);
+
+    for(var i=0; i<marbles.length; i++) {
+        player.addMarble(id, marbles[i].position[0], marbles[i].position[1], this.renderer, this.material.getBallMaterial(), input);
+        this.world.getWorld().addBody(player.marbles[player.marbles.length-1].circleBody); // Add the body of the (last created) marble to the world
+    }
+    
     this.players.push(player);
+
+    return player;
 };
 
 /**

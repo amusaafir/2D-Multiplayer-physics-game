@@ -18,13 +18,13 @@ Player.prototype.addMarble = function(id, position, material, world) {
 
 Player.prototype.getClientDetails = function() {
 	var clientDetails = {
-		playerId: id,
+		id: this.id,
 		marbles: []
 	};
 
 	// Get marbles
-	for(var i=0; i<marbles.length; i++) {
-		clientDetails.marbles.push(marbles[i].getClientDetails());
+	for(var i=0; i<this.marbles.length; i++) {
+		clientDetails.marbles.push(this.marbles[i].getClientDetails());
 	}
 
 	return clientDetails;
