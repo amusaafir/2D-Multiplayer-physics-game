@@ -182,7 +182,7 @@ Game.prototype.trajectory = function(marbleId, x, y) {
     this.marbleId = marbleId;
     this.request = true;
 
-    this.network.setTrajectory(x, y);
+    this.network.setTrajectory(marbleId, x, y);
 };
 
 /**

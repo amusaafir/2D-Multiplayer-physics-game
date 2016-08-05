@@ -72,7 +72,6 @@ Marble.prototype.createHitArea = function () {
     };
     this.graphics.mousedown = function(event) {
         if(self.input) {
-            console.log('clicked on circle with id: '+ self.id);
             self.input.clickedOnCircle(self.id, self.circleBody.position[0], self.circleBody.position[1]);
         }
     };
