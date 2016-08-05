@@ -1,5 +1,6 @@
 var Input = function(game) {
 	this.trajectory = {
+        marbleId: null,
     	startVector: {
     		x: 0,
     		y: 0
@@ -26,13 +27,14 @@ Input.prototype.initInputEvents = function() {
         var xTrajectory = self.trajectory.endVector.x - self.trajectory.startVector.x;
         var yTrajectory = self.trajectory.endVector.y - self.trajectory.startVector.y;
 
-        self.game.trajectory(xTrajectory, yTrajectory);
+        self.game.trajectory(self.trajectory.marbleId, xTrajectory, yTrajectory);
     };
 };
 
 // This will be only invoked when the player clickes on his own objects (circles)
-Input.prototype.clickedOnCircle = function(x, y) {
-	this.trajectory.startVector = {
+Input.prototype.clickedOnCircle = function(marbleId, x, y) {
+	this.trajectory.marbleId = marbleId;
+    this.trajectory.startVector = {
 		x: x,
 		y: y
 	};

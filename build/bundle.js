@@ -91,6 +91,8 @@ var Game = function() {
      */
     this.request;
 
+    this.marbleId;
+
     /**
      * Run the physics simulation.
      */
@@ -146,8 +148,8 @@ Game.prototype.addPlayer = function(id, marbles, isMainplayer) {
         input = this.input;
     }
 
-    for(var i=0; i<marbles.length; i++) {
-        player.addMarble(id, marbles[i].position[0], marbles[i].position[1], this.renderer, this.material.getBallMaterial(), input);
+    for(var id=0; id<marbles.length; id++) {
+        player.addMarble(id, marbles[id].position[0], marbles[id].position[1], this.renderer, this.material.getBallMaterial(), input);
         this.world.getWorld().addBody(player.marbles[player.marbles.length-1].circleBody); // Add the body of the (last created) marble to the world
     }
     
@@ -166,7 +168,7 @@ Game.prototype.postStep = function() {
     this.world.getWorld().on("postStep", function() {
         if (self.request) {
             var marblesContext = self.players[self.currentId].marbles;
-            marblesContext[marblesContext.length-1].circleBody.applyForce([self.currentX, self.currentY], marblesContext[marblesContext.length-1].circleBody.position);
+            marblesContext[self.marbleId].circleBody.applyForce([self.currentX, self.currentY], marblesContext[self.marbleId].circleBody.position);
             self.request = false;
         }
     });
@@ -178,7 +180,7 @@ Game.prototype.postStep = function() {
  * @param  {[type]} x [The x coordinate of the trajectory.]
  * @param  {[type]} y [The y coordinate of the trajectory.]
  */
-Game.prototype.trajectory = function(x, y) {
+Game.prototype.trajectory = function(marbleId, x, y) {
     var force = 600; // TODO: Add force limit; mainly necessary on the server side.
     x *= force;
     y *= force;
@@ -186,6 +188,7 @@ Game.prototype.trajectory = function(x, y) {
     this.currentId = this.mainPlayerId;
     this.currentX = x;
     this.currentY = y;
+    this.marbleId = marbleId;
     this.request = true;
 
     this.network.setTrajectory(x, y);
@@ -245,6 +248,7 @@ module.exports = Game;
 },{"./Input.js":3,"./Network.js":4,"./Renderer.js":5,"./Settings.js":6,"./entities/Player.js":8,"./entities/Wall.js":9,"./world/Material.js":10,"./world/World.js":11}],3:[function(require,module,exports){
 var Input = function(game) {
 	this.trajectory = {
+        marbleId: null,
     	startVector: {
     		x: 0,
     		y: 0
@@ -271,13 +275,14 @@ Input.prototype.initInputEvents = function() {
         var xTrajectory = self.trajectory.endVector.x - self.trajectory.startVector.x;
         var yTrajectory = self.trajectory.endVector.y - self.trajectory.startVector.y;
 
-        self.game.trajectory(xTrajectory, yTrajectory);
+        self.game.trajectory(self.trajectory.marbleId, xTrajectory, yTrajectory);
     };
 };
 
 // This will be only invoked when the player clickes on his own objects (circles)
-Input.prototype.clickedOnCircle = function(x, y) {
-	this.trajectory.startVector = {
+Input.prototype.clickedOnCircle = function(marbleId, x, y) {
+	this.trajectory.marbleId = marbleId;
+    this.trajectory.startVector = {
 		x: x,
 		y: y
 	};
@@ -321,7 +326,7 @@ Network.prototype.getPlayers = function() {
     this.socket.emit('getPlayers', null);
 
     this.socket.on('getPlayers', function(playersData) {
-        for (var i = 0; i < playersData.length; i++) {
+        for (var i = 0; i<playersData.length; i++) {
             var player = self.game.addPlayer(playersData[i].id, playersData[i].marbles, false);
 
             for(var m=0; m<player.marbles.length; m++) {
@@ -566,20 +571,21 @@ Marble.prototype.createGraphics = function() {
         this.shadow.drawCircle(0,0, 1);
         this.shadow.position.set(this.circleBody.position[0], this.circleBody.position[1]);
         this.renderer.container.addChild(this.shadow);
-    }
+   }
 };
 
 Marble.prototype.createHitArea = function () {
     var self = this;
 
-    this.graphics.interactive = true;
+    this. graphics.interactive = true;
     this.graphics.hitarea = new PIXI.Circle(0, 0, 1);
     
     this.graphics.click = function(event) {
     };
     this.graphics.mousedown = function(event) {
         if(self.input) {
-            self.input.clickedOnCircle(self.circleBody.position[0], self.circleBody.position[1]);
+            console.log('clicked on circle with id: '+ self.id);
+            self.input.clickedOnCircle(self.id, self.circleBody.position[0], self.circleBody.position[1]);
         }
     };
     this.graphics.mouseout = function(event) {

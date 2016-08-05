@@ -82,6 +82,8 @@ var Game = function() {
      */
     this.request;
 
+    this.marbleId;
+
     /**
      * Run the physics simulation.
      */
@@ -137,8 +139,8 @@ Game.prototype.addPlayer = function(id, marbles, isMainplayer) {
         input = this.input;
     }
 
-    for(var i=0; i<marbles.length; i++) {
-        player.addMarble(id, marbles[i].position[0], marbles[i].position[1], this.renderer, this.material.getBallMaterial(), input);
+    for(var id=0; id<marbles.length; id++) {
+        player.addMarble(id, marbles[id].position[0], marbles[id].position[1], this.renderer, this.material.getBallMaterial(), input);
         this.world.getWorld().addBody(player.marbles[player.marbles.length-1].circleBody); // Add the body of the (last created) marble to the world
     }
     
@@ -157,7 +159,7 @@ Game.prototype.postStep = function() {
     this.world.getWorld().on("postStep", function() {
         if (self.request) {
             var marblesContext = self.players[self.currentId].marbles;
-            marblesContext[marblesContext.length-1].circleBody.applyForce([self.currentX, self.currentY], marblesContext[marblesContext.length-1].circleBody.position);
+            marblesContext[self.marbleId].circleBody.applyForce([self.currentX, self.currentY], marblesContext[self.marbleId].circleBody.position);
             self.request = false;
         }
     });
@@ -169,7 +171,7 @@ Game.prototype.postStep = function() {
  * @param  {[type]} x [The x coordinate of the trajectory.]
  * @param  {[type]} y [The y coordinate of the trajectory.]
  */
-Game.prototype.trajectory = function(x, y) {
+Game.prototype.trajectory = function(marbleId, x, y) {
     var force = 600; // TODO: Add force limit; mainly necessary on the server side.
     x *= force;
     y *= force;
@@ -177,6 +179,7 @@ Game.prototype.trajectory = function(x, y) {
     this.currentId = this.mainPlayerId;
     this.currentX = x;
     this.currentY = y;
+    this.marbleId = marbleId;
     this.request = true;
 
     this.network.setTrajectory(x, y);

@@ -32,7 +32,7 @@ Network.prototype.getPlayers = function() {
     this.socket.emit('getPlayers', null);
 
     this.socket.on('getPlayers', function(playersData) {
-        for (var i = 0; i < playersData.length; i++) {
+        for (var i = 0; i<playersData.length; i++) {
             var player = self.game.addPlayer(playersData[i].id, playersData[i].marbles, false);
 
             for(var m=0; m<player.marbles.length; m++) {
