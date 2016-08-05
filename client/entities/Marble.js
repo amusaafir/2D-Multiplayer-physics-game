@@ -59,20 +59,21 @@ Marble.prototype.createGraphics = function() {
         this.shadow.drawCircle(0,0, 1);
         this.shadow.position.set(this.circleBody.position[0], this.circleBody.position[1]);
         this.renderer.container.addChild(this.shadow);
-    }
+   }
 };
 
 Marble.prototype.createHitArea = function () {
     var self = this;
 
-    this.graphics.interactive = true;
+    this. graphics.interactive = true;
     this.graphics.hitarea = new PIXI.Circle(0, 0, 1);
     
     this.graphics.click = function(event) {
     };
     this.graphics.mousedown = function(event) {
         if(self.input) {
-            self.input.clickedOnCircle(self.circleBody.position[0], self.circleBody.position[1]);
+            console.log('clicked on circle with id: '+ self.id);
+            self.input.clickedOnCircle(self.id, self.circleBody.position[0], self.circleBody.position[1]);
         }
     };
     this.graphics.mouseout = function(event) {
