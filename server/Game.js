@@ -20,6 +20,7 @@ function Game(io) {
 
     // Poststep data
     this.currentId;
+    this.marbleId;
     this.currentX;
     this.currentY;
     this.request = false;
@@ -78,7 +79,7 @@ Game.prototype.postStep = function() {
     this.world.world.on("postStep", function() {
         if (self.request) {
             var marblesContext = self.players[self.currentId].marbles;
-            marblesContext[marblesContext.length-1].circleBody.applyForce([self.currentX, self.currentY], marblesContext[marblesContext.length-1].circleBody.position);
+            marblesContext[self.marbleId].circleBody.applyForce([self.currentX, self.currentY], marblesContext[self.marbleId].circleBody.position);
             self.request = false;
         }
     });
