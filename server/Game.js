@@ -1,19 +1,17 @@
 var Player = require('./entities/Player');
-var Wall = require('./entities/Wall');
-var Position = require('./Position');
 var World = require('./world/World');
 var Material = require('./world/Material');
+var MapPicker = require('./maps/MapPicker');
 
 function Game(io) {
     this.io = io;
 
     this.players = [];
-    this.walls = [];
-    this.positions = [];
     this.material = new Material();
     this.world = new World(this.material);
     
-    this.loadScenery(); // TODO: Create separate 'scene' object
+    this.map = new MapPicker(this.material, this.world).selectDefaultMap();
+
     this.run();
     this.sendState();
     this.postStep();
@@ -25,29 +23,6 @@ function Game(io) {
     this.currentY;
     this.request = false;
 }
-
-Game.prototype.loadScenery = function() {
-    this.initPlayerPositions();
-    this.createWalls();
-};
-
-Game.prototype.initPlayerPositions = function() {
-    for (var x = -10; x < 10; x += 3) {
-        for (var y = -8; y < 8; y += 3) {
-            this.positions.push(new Position(x, y));
-        }
-    }
-};
-
-Game.prototype.createWalls = function() {
-    this.addWall();
-};
-
-Game.prototype.addWall = function() {
-    var wall = new Wall(this.material.getBallMaterial());
-    this.world.world.addBody(wall.boxBody);
-    this.walls.push(wall);
-};
 
 Game.prototype.run = function() {
     var self = this;
@@ -90,9 +65,9 @@ Game.prototype.addPlayer = function() {
     var player = new Player(id);
 
     // Add a marble
-    player.addMarble(id, this.positions.pop(), this.material.getBallMaterial(), this.world.world);
+    player.addMarble(id, this.map.positions.pop(), this.material.getBallMaterial(), this.world.world);
     // Add another marble (this will not be shown since this is not being sent yet to the client)
-    player.addMarble(id, this.positions.pop(), this.material.getBallMaterial(), this.world.world);
+    player.addMarble(id, this.map.positions.pop(), this.material.getBallMaterial(), this.world.world);
     
     this.players.push(player);
 

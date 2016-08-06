@@ -27,8 +27,8 @@ Network.prototype.connect = function() {
         socket.on('getWalls', function() {
             var data = [];
 
-            for (var i = 0; i < network.game.walls.length; i++) {
-                data.push(network.game.walls[i].getClientDetails());
+            for (var i = 0; i < network.game.map.walls.length; i++) {
+                data.push(network.game.map.walls[i].getClientDetails());
             }
 
             socket.emit('getWalls', data);
