@@ -1,22 +1,27 @@
-var Wall = function(renderer, material) {
+var Wall = function(x, y, width, height, renderer, material) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.material = material;
     this.renderer = renderer;
     this.boxShape;
     this.boxBody;
     this.graphics;
 
-    this.initShape(material);
+    this.initShape();
     this.initBody();
     this.createGraphics();
 };
 
 Wall.prototype.initShape = function(material) {
-    this.boxShape = new p2.Box({width: 2, height: 1, material: material});
+    this.boxShape = new p2.Box({width: this.width, height: this.height, material: this.material});
 };
 
 Wall.prototype.initBody = function() {
     this.boxBody = new p2.Body({
         mass: 15,
-        position: [0,2],
+        position: [this.x, this.y],
         angularDamping:.8
     });
     this.boxBody.damping = .8;

@@ -233,13 +233,11 @@ Game.prototype.drawTrajectory = function(x, y) {
     
 };
 
-Game.prototype.addWall = function(x, y, velocity, angularVelocity, angle) {
-    var wall = new Wall(this.renderer, this.material.getBallMaterial());
-    wall.boxBody.position[0] = x;
-    wall.boxBody.position[1] = y;
+Game.prototype.addWall = function(x, y, width, height, velocity, angularVelocity, angle) {
+    var wall = new Wall(x, y, width, height, this.renderer, this.material.getBallMaterial());
     wall.boxBody.angle = angle;
     wall.boxBody.velocity = velocity;
-    wall.boxBody.angularVelocity = angularVelocity; 
+    wall.boxBody.angularVelocity = angularVelocity;
     this.world.getWorld().addBody(wall.boxBody);
     this.walls.push(wall);
 };
@@ -344,7 +342,7 @@ Network.prototype.getWalls = function() {
 
     this.socket.on('getWalls', function(wallsData) {
         for (var i = 0; i < wallsData.length; i++) {
-            self.game.addWall(wallsData[i].position[0], wallsData[i].position[1], wallsData[i].velocity, wallsData[i].angularVelocity, wallsData[i].angle);
+            self.game.addWall(wallsData[i].position[0], wallsData[i].position[1], wallsData[i].width, wallsData[i].height, wallsData[i].velocity, wallsData[i].angularVelocity, wallsData[i].angle);
         }
     });
 };
@@ -622,25 +620,30 @@ Player.prototype.addMarble = function(id, x, y, renderer, material, input) {
 
 module.exports = Player;
 },{"./Marble.js":7}],9:[function(require,module,exports){
-var Wall = function(renderer, material) {
+var Wall = function(x, y, width, height, renderer, material) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.material = material;
     this.renderer = renderer;
     this.boxShape;
     this.boxBody;
     this.graphics;
 
-    this.initShape(material);
+    this.initShape();
     this.initBody();
     this.createGraphics();
 };
 
 Wall.prototype.initShape = function(material) {
-    this.boxShape = new p2.Box({width: 2, height: 1, material: material});
+    this.boxShape = new p2.Box({width: this.width, height: this.height, material: this.material});
 };
 
 Wall.prototype.initBody = function() {
     this.boxBody = new p2.Body({
         mass: 15,
-        position: [0,2],
+        position: [this.x, this.y],
         angularDamping:.8
     });
     this.boxBody.damping = .8;
