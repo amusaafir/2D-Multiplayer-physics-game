@@ -24,8 +24,14 @@ DefaultMap.prototype.initPlayerPositions = function() {
 };
 
 DefaultMap.prototype.createWalls = function() {
-    this.addWall(0, 2, 4, 2, 10, 15, this.material.getBallMaterial());
-    this.addWall(5, 6, 3, 2, 10, 15, this.material.getBallMaterial());
+    // Obstacles
+    this.addWall(0, 2, 4, 4, 10, 10, this.material.getBallMaterial());
+
+    // Sides
+    this.addWall(-24, 0, 1, 28, 0, 0, this.material.getBallMaterial());
+    this.addWall(24, 0, 1, 28, 0, 0, this.material.getBallMaterial());
+    this.addWall(0, -13, 46.99, 1, 0, 0, this.material.getBallMaterial());
+    this.addWall(0, 13, 46.99, 1, 0, 0, this.material.getBallMaterial());  
 };
 
 DefaultMap.prototype.addWall = function(x, y, width, height, angle, mass, material) {
