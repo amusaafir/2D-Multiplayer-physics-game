@@ -1,10 +1,11 @@
 var p2 = require('p2');
 
-var Wall = function(x, y, width, height, material) {
+var Wall = function(x, y, width, height, angle, material) {
     this.width = width;
     this.height = height;
     this.x = x;
     this.y = y;
+    this.angle = angle;
     this.material = material;
     this.boxShape;
     this.boxBody;
@@ -21,7 +22,8 @@ Wall.prototype.initBody = function() {
     this.boxBody = new p2.Body({
         mass: 15,
         position: [this.x, this.y],
-        angularDamping:.8
+        angularDamping:.8,
+        angle: this.angle
     });
     this.boxBody.damping = .8;
     this.boxBody.allowSleep = true;

@@ -1,8 +1,9 @@
-var Wall = function(x, y, width, height, renderer, material) {
+var Wall = function(x, y, width, height, angle, renderer, material) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
+    this.angle = angle;
     this.material = material;
     this.renderer = renderer;
     this.boxShape;
@@ -14,7 +15,7 @@ var Wall = function(x, y, width, height, renderer, material) {
     this.createGraphics();
 };
 
-Wall.prototype.initShape = function(material) {
+Wall.prototype.initShape = function() {
     this.boxShape = new p2.Box({width: this.width, height: this.height, material: this.material});
 };
 
@@ -22,7 +23,8 @@ Wall.prototype.initBody = function() {
     this.boxBody = new p2.Body({
         mass: 15,
         position: [this.x, this.y],
-        angularDamping:.8
+        angularDamping:.8,
+        angle: this.angle
     });
     this.boxBody.damping = .8;
     this.boxBody.allowSleep = true;
@@ -35,7 +37,7 @@ Wall.prototype.createGraphics = function() {
     this.graphics = new PIXI.Graphics();
     this.graphics.beginFill(0xff0000);
     this.graphics.drawRect(-this.boxShape.width/2, -this.boxShape.height/2, this.boxShape.width, this.boxShape.height);
-
+    this.graphics.rotation = this.boxBody.angle;
     this.renderer.container.addChild(this.graphics);
 };
 
