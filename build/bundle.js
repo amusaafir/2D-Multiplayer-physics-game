@@ -233,8 +233,8 @@ Game.prototype.drawTrajectory = function(x, y) {
     
 };
 
-Game.prototype.addWall = function(x, y, width, height, angle, velocity, angularVelocity, angle) {
-    var wall = new Wall(x, y, width, height, angle, this.renderer, this.material.getBallMaterial());
+Game.prototype.addWall = function(x, y, width, height, angle, mass, velocity, angularVelocity, angle) {
+    var wall = new Wall(x, y, width, height, angle, mass, this.renderer, this.material.getBallMaterial());
     wall.boxBody.angle = angle;
     wall.boxBody.velocity = velocity;
     wall.boxBody.angularVelocity = angularVelocity;
@@ -342,7 +342,7 @@ Network.prototype.getWalls = function() {
 
     this.socket.on('getWalls', function(wallsData) {
         for (var i = 0; i < wallsData.length; i++) {
-            self.game.addWall(wallsData[i].position[0], wallsData[i].position[1], wallsData[i].width, wallsData[i].height, wallsData[i].angle, wallsData[i].velocity, wallsData[i].angularVelocity, wallsData[i].angle);
+            self.game.addWall(wallsData[i].position[0], wallsData[i].position[1], wallsData[i].width, wallsData[i].height, wallsData[i].angle, wallsData[i].mass, wallsData[i].velocity, wallsData[i].angularVelocity, wallsData[i].angle);
         }
     });
 };
@@ -620,12 +620,13 @@ Player.prototype.addMarble = function(id, x, y, renderer, material, input) {
 
 module.exports = Player;
 },{"./Marble.js":7}],9:[function(require,module,exports){
-var Wall = function(x, y, width, height, angle, renderer, material) {
+var Wall = function(x, y, width, height, angle, mass, renderer, material) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
     this.angle = angle;
+    this.mass = mass;
     this.material = material;
     this.renderer = renderer;
     this.boxShape;
@@ -643,7 +644,7 @@ Wall.prototype.initShape = function() {
 
 Wall.prototype.initBody = function() {
     this.boxBody = new p2.Body({
-        mass: 15,
+        mass: this.mass,
         position: [this.x, this.y],
         angularDamping:.8,
         angle: this.angle

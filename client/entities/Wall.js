@@ -1,9 +1,10 @@
-var Wall = function(x, y, width, height, angle, renderer, material) {
+var Wall = function(x, y, width, height, angle, mass, renderer, material) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
     this.angle = angle;
+    this.mass = mass;
     this.material = material;
     this.renderer = renderer;
     this.boxShape;
@@ -21,7 +22,7 @@ Wall.prototype.initShape = function() {
 
 Wall.prototype.initBody = function() {
     this.boxBody = new p2.Body({
-        mass: 15,
+        mass: this.mass,
         position: [this.x, this.y],
         angularDamping:.8,
         angle: this.angle
