@@ -224,13 +224,11 @@ Game.prototype.drawTrajectory = function(x, y) {
     
 };
 
-Game.prototype.addWall = function(x, y, velocity, angularVelocity, angle) {
-    var wall = new Wall(this.renderer, this.material.getBallMaterial());
-    wall.boxBody.position[0] = x;
-    wall.boxBody.position[1] = y;
+Game.prototype.addWall = function(x, y, width, height, velocity, angularVelocity, angle) {
+    var wall = new Wall(x, y, width, height, this.renderer, this.material.getBallMaterial());
     wall.boxBody.angle = angle;
     wall.boxBody.velocity = velocity;
-    wall.boxBody.angularVelocity = angularVelocity; 
+    wall.boxBody.angularVelocity = angularVelocity;
     this.world.getWorld().addBody(wall.boxBody);
     this.walls.push(wall);
 };
