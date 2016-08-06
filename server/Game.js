@@ -64,11 +64,10 @@ Game.prototype.addPlayer = function() {
     var id = this.players.length;
     var player = new Player(id);
 
-    // Add a marble
-    player.addMarble(id, this.map.positions.pop(), this.material.getBallMaterial(), this.world.world);
-    // Add another marble (this will not be shown since this is not being sent yet to the client)
-    player.addMarble(id, this.map.positions.pop(), this.material.getBallMaterial(), this.world.world);
-    
+    for(var i=0; i<this.map.initialNumberMarblesPerPlayer; i++) {
+        player.addMarble(id, this.map.positions.pop(), this.material.getBallMaterial(), this.world.world);
+    }
+
     this.players.push(player);
 
     return player;

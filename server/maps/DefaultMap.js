@@ -2,6 +2,8 @@ var Position = require('./Position');
 var Wall = require('../entities/Wall');
 
 var DefaultMap = function(material, world) {
+    this.maxNumberPlayers = 2; // TODO: Implement
+    this.initialNumberMarblesPerPlayer = 3;
 	this.material = material;
 	this.world = world;
     this.walls = [];
