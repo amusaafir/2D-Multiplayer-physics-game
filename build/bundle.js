@@ -233,8 +233,8 @@ Game.prototype.drawTrajectory = function(x, y) {
     
 };
 
-Game.prototype.addWall = function(x, y, width, height, velocity, angularVelocity, angle) {
-    var wall = new Wall(x, y, width, height, this.renderer, this.material.getBallMaterial());
+Game.prototype.addWall = function(x, y, width, height, angle, velocity, angularVelocity, angle) {
+    var wall = new Wall(x, y, width, height, angle, this.renderer, this.material.getBallMaterial());
     wall.boxBody.angle = angle;
     wall.boxBody.velocity = velocity;
     wall.boxBody.angularVelocity = angularVelocity;
@@ -342,7 +342,7 @@ Network.prototype.getWalls = function() {
 
     this.socket.on('getWalls', function(wallsData) {
         for (var i = 0; i < wallsData.length; i++) {
-            self.game.addWall(wallsData[i].position[0], wallsData[i].position[1], wallsData[i].width, wallsData[i].height, wallsData[i].velocity, wallsData[i].angularVelocity, wallsData[i].angle);
+            self.game.addWall(wallsData[i].position[0], wallsData[i].position[1], wallsData[i].width, wallsData[i].height, wallsData[i].angle, wallsData[i].velocity, wallsData[i].angularVelocity, wallsData[i].angle);
         }
     });
 };
@@ -620,11 +620,12 @@ Player.prototype.addMarble = function(id, x, y, renderer, material, input) {
 
 module.exports = Player;
 },{"./Marble.js":7}],9:[function(require,module,exports){
-var Wall = function(x, y, width, height, renderer, material) {
+var Wall = function(x, y, width, height, angle, renderer, material) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
+    this.angle = angle;
     this.material = material;
     this.renderer = renderer;
     this.boxShape;
@@ -636,7 +637,7 @@ var Wall = function(x, y, width, height, renderer, material) {
     this.createGraphics();
 };
 
-Wall.prototype.initShape = function(material) {
+Wall.prototype.initShape = function() {
     this.boxShape = new p2.Box({width: this.width, height: this.height, material: this.material});
 };
 
@@ -644,7 +645,8 @@ Wall.prototype.initBody = function() {
     this.boxBody = new p2.Body({
         mass: 15,
         position: [this.x, this.y],
-        angularDamping:.8
+        angularDamping:.8,
+        angle: this.angle
     });
     this.boxBody.damping = .8;
     this.boxBody.allowSleep = true;
@@ -657,7 +659,7 @@ Wall.prototype.createGraphics = function() {
     this.graphics = new PIXI.Graphics();
     this.graphics.beginFill(0xff0000);
     this.graphics.drawRect(-this.boxShape.width/2, -this.boxShape.height/2, this.boxShape.width, this.boxShape.height);
-
+    this.graphics.rotation = this.boxBody.angle;
     this.renderer.container.addChild(this.graphics);
 };
 

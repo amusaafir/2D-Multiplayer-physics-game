@@ -24,12 +24,12 @@ DefaultMap.prototype.initPlayerPositions = function() {
 };
 
 DefaultMap.prototype.createWalls = function() {
-    this.addWall(0, 2, 4, 2, this.material.getBallMaterial());
-    this.addWall(5, 6, 3, 2, this.material.getBallMaterial());
+    this.addWall(0, 2, 4, 2, 10, this.material.getBallMaterial());
+    this.addWall(5, 6, 3, 2, 10, this.material.getBallMaterial());
 };
 
-DefaultMap.prototype.addWall = function(x, y, width, height, material) {
-    var wall = new Wall(x, y, width, height, material);
+DefaultMap.prototype.addWall = function(x, y, width, height, angle, material) {
+    var wall = new Wall(x, y, width, height, angle, material);
     this.world.world.addBody(wall.boxBody);
     this.walls.push(wall);
 };
