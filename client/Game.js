@@ -224,8 +224,8 @@ Game.prototype.drawTrajectory = function(x, y) {
     
 };
 
-Game.prototype.addWall = function(x, y, width, height, angle, velocity, angularVelocity, angle) {
-    var wall = new Wall(x, y, width, height, angle, this.renderer, this.material.getBallMaterial());
+Game.prototype.addWall = function(x, y, width, height, angle, mass, velocity, angularVelocity, angle) {
+    var wall = new Wall(x, y, width, height, angle, mass, this.renderer, this.material.getBallMaterial());
     wall.boxBody.angle = angle;
     wall.boxBody.velocity = velocity;
     wall.boxBody.angularVelocity = angularVelocity;

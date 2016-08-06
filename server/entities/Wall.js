@@ -1,11 +1,12 @@
 var p2 = require('p2');
 
-var Wall = function(x, y, width, height, angle, material) {
+var Wall = function(x, y, width, height, angle, mass, material) {
     this.width = width;
     this.height = height;
     this.x = x;
     this.y = y;
     this.angle = angle;
+    this.mass = mass;
     this.material = material;
     this.boxShape;
     this.boxBody;
@@ -20,7 +21,7 @@ Wall.prototype.initShape = function() {
 
 Wall.prototype.initBody = function() {
     this.boxBody = new p2.Body({
-        mass: 15,
+        mass: this.mass,
         position: [this.x, this.y],
         angularDamping:.8,
         angle: this.angle
@@ -41,9 +42,9 @@ Wall.prototype.getClientDetails = function() {
         position: self.boxBody.position,
         velocity: self.boxBody.velocity,
         angle: self.boxBody.angle,
+        mass: self.boxBody.mass,
         angularVelocity: self.boxBody.angularVelocity
     };
 };
-
 
 module.exports = Wall;

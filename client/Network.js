@@ -50,7 +50,7 @@ Network.prototype.getWalls = function() {
 
     this.socket.on('getWalls', function(wallsData) {
         for (var i = 0; i < wallsData.length; i++) {
-            self.game.addWall(wallsData[i].position[0], wallsData[i].position[1], wallsData[i].width, wallsData[i].height, wallsData[i].angle, wallsData[i].velocity, wallsData[i].angularVelocity, wallsData[i].angle);
+            self.game.addWall(wallsData[i].position[0], wallsData[i].position[1], wallsData[i].width, wallsData[i].height, wallsData[i].angle, wallsData[i].mass, wallsData[i].velocity, wallsData[i].angularVelocity, wallsData[i].angle);
         }
     });
 };
