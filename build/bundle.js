@@ -81,6 +81,8 @@ var Game = function() {
 
     this.countSteps = false;
 
+    this.clientData = {};
+
     /**
      * Run the physics simulation.
      */
@@ -114,10 +116,10 @@ Game.prototype.run = function() {
                 for(var i=0; i<bodies.length; i++) { // Enforce v = 0 for all bodies
                     bodies[i].velocity[0] = 0;
                     bodies[i].velocity[1] = 0; 
+                    self.sync();
                 }
                 self.step = 0;
                 self.countSteps = false;
-                console.log('cs: ' + self.countSteps);
             }
         }
 
@@ -136,6 +138,30 @@ Game.prototype.draw = function() {
     function draw() {
         requestAnimationFrame(draw);
         self.renderer.render();
+    }
+};
+
+// Consider moving this to network
+Game.prototype.sync = function() {
+    var playersData = this.clientData.players;
+    var wallsData = this.clientData.walls;
+
+    if(playersData.length == this.players.length) {
+        for(var i = 0; i < playersData.length; i++) {
+            var playerMarbles = playersData[i].marbles;
+
+            if(playerMarbles.length != playersData[i].marbles.length) {
+                console.log('Inconsistent marbles for player ' + i);
+                continue;
+            } else {
+                for(var m = 0; m < playerMarbles.length; m++) {
+                    this.players[i].marbles[m].circleBody.position[0] = playersData[i].marbles[m].position[0];
+                    this.players[i].marbles[m].circleBody.position[1] = playersData[i].marbles[m].position[1];
+                }
+            }
+        }
+    } else {
+        console.log('State error: players inconsistent.');
     }
 };
 
@@ -325,6 +351,7 @@ Network.prototype.connected = function() {
     this.addNewPlayer();
     this.receiveState();
     this.receiveImpulseState();
+    this.syncPositionsWithServer();
 };
 
 Network.prototype.getPlayers = function() {
@@ -406,6 +433,14 @@ Network.prototype.receiveState = function() {
         } else {
             console.log('State error: players inconsistent.');
         }
+    });
+};
+
+Network.prototype.syncPositionsWithServer = function() {
+    var self = this;
+
+    this.socket.on('sync', function(clientData) { // List containing clientdata for each player
+        self.game.clientData = clientData;
     });
 };
 
@@ -514,7 +549,7 @@ Renderer.prototype.getLocalMousePosition = function() {
 module.exports = Renderer;
 },{}],6:[function(require,module,exports){
 var Settings = function() {
-    this.showServerPosition = false;
+    this.showServerPosition = true;
 };
 
 module.exports = Settings;

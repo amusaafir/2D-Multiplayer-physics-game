@@ -55,6 +55,7 @@ Network.prototype.connect = function() {
             network.game.applyForce.x = data.x;
             network.game.applyForce.y = data.y;
             network.game.applyForce.request = true;
+            network.game.countSteps = true;
 
             if (self) {
                 self.emit('impulseState', data);
