@@ -12,16 +12,18 @@ function Game(io) {
     
     this.map = new MapPicker(this.material, this.world).selectDefaultMap();
 
+    // Poststep data
+    this.applyForce = {
+        playerId: null,
+        marbleId: null,
+        x: null,
+        y: null,
+        request: false
+    };
+
     this.run();
     this.sendState();
     this.postStep();
-
-    // Poststep data
-    this.currentId;
-    this.marbleId;
-    this.currentX;
-    this.currentY;
-    this.request = false;
 }
 
 Game.prototype.run = function() {
@@ -52,10 +54,10 @@ Game.prototype.postStep = function() {
     var self = this;
 
     this.world.world.on("postStep", function() {
-        if (self.request) {
-            var marblesContext = self.players[self.currentId].marbles;
-            marblesContext[self.marbleId].circleBody.applyForce([self.currentX, self.currentY], marblesContext[self.marbleId].circleBody.position);
-            self.request = false;
+        if (self.applyForce.request) {
+            var marblesContext = self.players[self.applyForce.playerId].marbles;
+            marblesContext[self.applyForce.marbleId].circleBody.applyForce([self.applyForce.x, self.applyForce.y], marblesContext[self.applyForce.marbleId].circleBody.position);
+            self.applyForce.request = false;
         }
     });
 };

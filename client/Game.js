@@ -58,31 +58,13 @@ var Game = function() {
      */
     this.renderer = new Renderer(this, this.settings);
 
-    /**
-     * The id of the player performing an action on postStep.
-     * @type {Number}
-     */
-    this.currentId;
-
-    /**
-     * The x coordinate of the trajectory that is performed on postStep.
-     * @type {Number}
-     */
-    this.currentX;
-
-    /**
-     * The y coordinate of the trajectory that is performed on postStep.
-     * @type {Number}
-     */
-    this.currentY;
-
-    /**
-     * Determines whether a force needs to be executed on the ball of a player.
-     * @type {Boolean}
-     */
-    this.request;
-
-    this.marbleId;
+    this.applyForce = {
+        playerId: null,
+        marbleId: null,
+        x: null,
+        y: null,
+        request: false
+    };
 
     /**
      * Run the physics simulation.
@@ -157,10 +139,10 @@ Game.prototype.postStep = function() {
     var self = this;
 
     this.world.getWorld().on("postStep", function() {
-        if (self.request) {
-            var marblesContext = self.players[self.currentId].marbles;
-            marblesContext[self.marbleId].circleBody.applyForce([self.currentX, self.currentY], marblesContext[self.marbleId].circleBody.position);
-            self.request = false;
+        if (self.applyForce.request) {
+            var marblesContext = self.players[self.applyForce.playerId].marbles;
+            marblesContext[self.applyForce.marbleId].circleBody.applyForce([self.applyForce.x, self.applyForce.y], marblesContext[self.applyForce.marbleId].circleBody.position);
+            self.applyForce.request = false;
         }
     });
 };
@@ -176,11 +158,13 @@ Game.prototype.trajectory = function(marbleId, x, y) {
     x *= force;
     y *= force;
     
-    this.currentId = this.mainPlayerId;
-    this.currentX = x;
-    this.currentY = y;
-    this.marbleId = marbleId;
-    this.request = true;
+    this.applyForce = {
+        playerId: this.mainPlayerId,
+        x: x,
+        y: y,
+        marbleId: marbleId,
+        request: true
+    };
 
     this.network.setTrajectory(marbleId, x, y);
 };
@@ -190,13 +174,15 @@ Game.prototype.trajectory = function(marbleId, x, y) {
  */
 Game.prototype.arePositionsSynced = function() {
     for (var i = 0; i < this.players.length; i++) {
-        /*if (this.players[i].marble.circleBody.position[0] != this.players[i].marble.shadowX) {
-            console.log('X not equal for ' + i + ', client: ' + this.players[i].marble.circleBody.position[0] + '; server ' + this.players[i].marble.shadowX);
-        }
+        for (var m = 0; m < this.players[i].marbles.length; m++) {
+            if (this.players[i].marbles[m].circleBody.position[0] != this.players[i].marbles[m].shadowX) {
+                console.log('X not equal for ' + i + ', client: ' + this.players[i].marbles[m].circleBody.position[0] + '; server ' + this.players[i].marbles[m].shadowX);
+            }
 
-        if (this.players[i].marble.circleBody.position[1] != this.players[i].marble.shadowY) {
-            console.log('Y not equal for ' + i + ', client: ' + this.players[i].marble.circleBody.position[1] + '; server ' + this.players[i].marble.shadowY);
-        }*/
+            if (this.players[i].marbles[m].circleBody.position[1] != this.players[i].marbles[m].shadowY) {
+                console.log('Y not equal for ' + i + ', client: ' + this.players[i].marbles[m].circleBody.position[1] + '; server ' + this.players[i].marbles[m].shadowY);
+            }
+        }
     }
 };
 

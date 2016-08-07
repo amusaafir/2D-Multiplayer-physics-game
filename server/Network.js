@@ -50,11 +50,11 @@ Network.prototype.connect = function() {
         });
 
         socket.on('impulse', function(data) {
-            network.game.currentId = data.id;
-            network.game.marbleId = data.marbleId;
-            network.game.currentX = data.x;
-            network.game.currentY = data.y;
-            network.game.request = true;
+            network.game.applyForce.playerId = data.id;
+            network.game.applyForce.marbleId = data.marbleId;
+            network.game.applyForce.x = data.x;
+            network.game.applyForce.y = data.y;
+            network.game.applyForce.request = true;
 
             if (self) {
                 self.emit('impulseState', data);
