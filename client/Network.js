@@ -113,19 +113,18 @@ Network.prototype.receiveImpulseState = function() {
 
     this.socket.on('impulseState', function(data) {
         if (data.id != self.game.mainPlayerId) {
-            self.game.currentId = data.id;
-            self.game.marbleId = data.marbleId;
-            self.game.currentX = data.x;
-            self.game.currentY = data.y;
-
-            self.game.request = true;
+            self.game.applyForce.playerId= data.id;
+            self.game.applyForce.marbleId = data.marbleId;
+            self.game.applyForce.x = data.x;
+            self.game.applyForce.y = data.y;
+            self.game.applyForce.request = true;
         }
     });
 };
 
 Network.prototype.setTrajectory = function(marbleId, x, y) {
     var self = this;
-
+    
     this.socket.emit('impulse', {
         id: self.game.mainPlayerId,
         marbleId: marbleId,

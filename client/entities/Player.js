@@ -17,7 +17,6 @@ Player.prototype.drawMarbles = function(showServerPosition) {
 };
 
 Player.prototype.addMarble = function(id, x, y, renderer, material, input) {
-	console.log(x + ', '+ y);
 	this.marbles.push(new Marble(id, x, y, renderer, material, input));
 };
 
