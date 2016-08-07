@@ -66,6 +66,12 @@ var Game = function() {
         request: false
     };
 
+    this.maxStep = 1000;
+
+    this.step = 0;
+
+    this.countSteps = false;
+
     /**
      * Run the physics simulation.
      */
@@ -90,6 +96,22 @@ Game.prototype.run = function() {
 
     setInterval(function() {
         self.world.getWorld().step(1 / 120);
+        
+        if(self.countSteps) {
+            self.step++;
+            if(self.step==self.maxStep) {
+                console.log('Enforce v=0.');
+                var bodies = self.world.getWorld().bodies;
+                for(var i=0; i<bodies.length; i++) { // Enforce v = 0 for all bodies
+                    bodies[i].velocity[0] = 0;
+                    bodies[i].velocity[1] = 0; 
+                }
+                self.step = 0;
+                self.countSteps = false;
+                console.log('cs: ' + self.countSteps);
+            }
+        }
+
     }, 1000 / 120);
 };
 
@@ -166,6 +188,7 @@ Game.prototype.trajectory = function(marbleId, x, y) {
         request: true
     };
 
+    this.countSteps = true;
     this.network.setTrajectory(marbleId, x, y);
 };
 
