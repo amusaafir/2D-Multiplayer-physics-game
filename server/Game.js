@@ -21,6 +21,10 @@ function Game(io) {
         request: false
     };
 
+    this.countSteps = false;
+    this.step = 0;
+    this.maxStep = 1000;
+
     this.run();
     this.sendState();
     this.postStep();
@@ -30,10 +34,29 @@ Game.prototype.run = function() {
     var self = this;
 
     setInterval(function() {
-        self.world.world.step(1 / 120);
+        if(self.countSteps) {
+            var fastForwardSpeed = 10;
+            for(var i=0; i<fastForwardSpeed; i++) { // Fast forward physics simulation
+                self.world.world.step(1 / 120);
+
+                self.step++;
+                if(self.step==self.maxStep) {
+                    console.log('Enforce v=0.');
+                    var bodies = self.world.world.bodies;
+                    for(var i=0; i<bodies.length; i++) { // Enforce v = 0 for all bodies
+                        bodies[i].velocity[0] = 0;
+                        bodies[i].velocity[1] = 0; 
+                        self.syncClientsPositions();
+                    }
+                    self.step = 0;
+                    self.countSteps = false;
+                }
+            }
+        }
     }, 1000 / 120);
 };
 
+// TODO: Remove later (only for debugging)
 Game.prototype.sendState = function() {
     var self = this;
 
@@ -48,6 +71,26 @@ Game.prototype.sendState = function() {
             self.io.emit('state', clientDetails);
         }
     }, 500);
+};
+
+// TODO: Through network class?
+Game.prototype.syncClientsPositions = function() {
+    var players = [];
+    var walls = [];
+    var clientDetails = {};
+
+    for (var i = 0; i < this.players.length; i++) {
+        players.push(this.players[i].getClientDetails());
+    }
+
+    for (var i = 0; i < this.map.walls.length; i++) {
+        walls.push(this.map.walls[i].getClientDetails());
+    }    
+
+    clientDetails.walls = walls;
+    clientDetails.players = players;
+    
+    this.io.emit('sync', clientDetails);
 };
 
 Game.prototype.postStep = function() {

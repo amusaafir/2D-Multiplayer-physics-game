@@ -24,6 +24,7 @@ Network.prototype.connected = function() {
     this.addNewPlayer();
     this.receiveState();
     this.receiveImpulseState();
+    this.syncPositionsWithServer();
 };
 
 Network.prototype.getPlayers = function() {
@@ -105,6 +106,14 @@ Network.prototype.receiveState = function() {
         } else {
             console.log('State error: players inconsistent.');
         }
+    });
+};
+
+Network.prototype.syncPositionsWithServer = function() {
+    var self = this;
+
+    this.socket.on('sync', function(clientData) { // List containing clientdata for each player
+        self.game.clientData = clientData;
     });
 };
 
