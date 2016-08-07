@@ -132,7 +132,8 @@ Game.prototype.draw = function() {
     }
 };
 
-// Consider moving this to network
+// TODO: Consider moving this to network
+// Refactor: single method instead of two for bodies
 Game.prototype.sync = function() {
     var playersData = this.clientData.players;
     var wallsData = this.clientData.walls;
@@ -153,6 +154,17 @@ Game.prototype.sync = function() {
         }
     } else {
         console.log('State error: players inconsistent.');
+    }
+    
+    if(wallsData.length == this.walls.length) {
+        for(var i = 0; i < wallsData.length; i++) {
+            var wall = wallsData[i];
+            this.walls[i].boxBody.position[0] = wall.position[0];
+            this.walls[i].boxBody.position[1] = wall.position[1];
+            this.walls[i].boxBody.angle = wall.angle;   
+        }
+    } else {
+        console.log('State error: walls inconsistent.');
     }
 };
 
