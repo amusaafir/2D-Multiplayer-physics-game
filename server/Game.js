@@ -34,11 +34,11 @@ Game.prototype.run = function() {
     var self = this;
 
     setInterval(function() {
-        if(self.countSteps) {
-            var fastForwardSpeed = 10;
-            for(var i=0; i<fastForwardSpeed; i++) { // Fast forward physics simulation
-                self.world.world.step(1 / 120);
+        var simulationSpeed = 2;
 
+        for(var i=0; i<simulationSpeed; i++) {
+            self.world.world.step(1 / 120);
+            if(self.countSteps) {
                 self.step++;
                 if(self.step==self.maxStep) {
                     console.log('Enforce v=0.');
