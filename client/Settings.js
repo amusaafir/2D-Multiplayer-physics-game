@@ -1,5 +1,5 @@
 var Settings = function() {
-    this.showServerPosition = true;
+    this.showServerPosition = false;
 };
 
 module.exports = Settings;

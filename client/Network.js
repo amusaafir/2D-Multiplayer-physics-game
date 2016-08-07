@@ -111,13 +111,14 @@ Network.prototype.receiveState = function() {
 Network.prototype.receiveImpulseState = function() {
     var self = this;
 
-    this.socket.on('impulseState', function(data) {
-        if (data.id != self.game.mainPlayerId) {
+    this.socket.on('impulseState', function(data) { 
+        if (data.id != self.game.mainPlayerId) { // TODO: extract to separate method inside the game class
             self.game.applyForce.playerId= data.id;
             self.game.applyForce.marbleId = data.marbleId;
             self.game.applyForce.x = data.x;
             self.game.applyForce.y = data.y;
             self.game.applyForce.request = true;
+            self.game.countSteps = true;
         }
     });
 };
