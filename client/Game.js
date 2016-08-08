@@ -271,7 +271,7 @@ Game.prototype.drawTrajectory = function(x, y) {
     
 };
 
-Game.prototype.addWall = function(x, y, width, height, angle, mass, velocity, angularVelocity, angle) {
+Game.prototype.addWall = function(x, y, width, height, angle, mass, velocity, angularVelocity) {
     var wall = new Wall(x, y, width, height, angle, mass, this.renderer, this.material.getBallMaterial());
     wall.boxBody.angle = angle;
     wall.boxBody.velocity = velocity;

@@ -71,6 +71,18 @@ Game.prototype.sendState = function() {
             self.io.emit('state', clientDetails);
         }
     }, 500);
+
+    setInterval(function() {
+        var clientDetails = [];
+
+        for (var i = 0; i < self.map.walls.length; i++) {
+            clientDetails.push(self.map.walls[i].getClientDetails());
+        }
+
+        if (self.io) {
+            self.io.emit('stateWalls', clientDetails);
+        }
+    }, 500);
 };
 
 // TODO: Through network class?
@@ -86,7 +98,7 @@ Game.prototype.syncClientsPositions = function() {
     for (var i = 0; i < this.map.walls.length; i++) {
         walls.push(this.map.walls[i].getClientDetails());
     }    
-
+    
     clientDetails.walls = walls;
     clientDetails.players = players;
     
