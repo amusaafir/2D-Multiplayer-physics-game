@@ -1,3 +1,5 @@
+var Settings = require('../Settings.js');
+
 var Wall = function(x, y, width, height, angle, mass, renderer, material) {
     this.x = x;
     this.y = y;
@@ -14,6 +16,7 @@ var Wall = function(x, y, width, height, angle, mass, renderer, material) {
     this.xPosServer;
     this.yPosServer;
     this.angleServer;
+    this.settings = new Settings();
 
     this.initShape();
     this.initBody();
@@ -45,12 +48,13 @@ Wall.prototype.createGraphics = function() {
     this.graphics.rotation = this.boxBody.angle;
     this.renderer.container.addChild(this.graphics);
 
+    if(this.settings.showServerPosition) {
         this.shadow = new PIXI.Graphics();
         this.shadow.beginFill(0xEEEEEE, 0.5);
-         this.shadow.drawRect(-this.boxShape.width/2, -this.boxShape.height/2, this.boxShape.width, this.boxShape.height);
+        this.shadow.drawRect(-this.boxShape.width/2, -this.boxShape.height/2, this.boxShape.width, this.boxShape.height);
         this.shadow.rotation = this.boxBody.angle;
         this.renderer.container.addChild(this.shadow);
-   
+    }
 };
 
 Wall.prototype.draw = function() {
