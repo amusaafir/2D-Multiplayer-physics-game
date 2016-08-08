@@ -1,17 +1,19 @@
 var Settings = require('../Settings.js');
 
-var Marble = function(id, x, y, renderer, material, input) {
+var Marble = function(id, x, y, renderer, material, input, isMainPlayer) {
     this.id = id;
     this.circleShape;
     this.circleBody;
+    this.graphics;
     this.shadowX = x;
     this.shadowY = y;
     this.renderer = renderer;
     this.input = input;
     this.settings = new Settings();
+
     this.initCircleShape(material);
     this.initPhysicsBody(x, y);
-    this.createGraphics();
+    this.createGraphics(isMainPlayer);
     this.createHitArea();
 };
 
@@ -43,10 +45,11 @@ Marble.prototype.drawShadow = function() {
     this.shadow.position.set(this.shadowX, this.shadowY);
 };
 
-Marble.prototype.createGraphics = function() {
+Marble.prototype.createGraphics = function(isMainPlayer) {
     this.graphics = new PIXI.Graphics();
     this.graphics.lineStyle(0);
-    this.graphics.beginFill(0xFFFFFF, 1);
+    var color = isMainPlayer ? 0x66FF99 : 0xFFFFFF;
+    this.graphics.beginFill(color, 1);
     this.graphics.drawCircle(0, 0, 1);
     this.graphics.position.set(this.circleBody.position[0], this.circleBody.position[1]);
     this.renderer.container.addChild(this.graphics);
