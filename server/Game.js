@@ -46,8 +46,8 @@ Game.prototype.run = function() {
                     for(var i=0; i<bodies.length; i++) { // Enforce v = 0 for all bodies
                         bodies[i].velocity[0] = 0;
                         bodies[i].velocity[1] = 0; 
-                        self.syncClientsPositions();
                     }
+                    self.syncClientsPositions();
                     self.step = 0;
                     self.countSteps = false;
                 }
@@ -104,6 +104,8 @@ Game.prototype.syncClientsPositions = function() {
     
     this.io.emit('sync', clientDetails);
 };
+
+
 
 Game.prototype.postStep = function() {
     var self = this;
