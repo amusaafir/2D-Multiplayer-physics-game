@@ -105,7 +105,7 @@ Network.prototype.receiveState = function() {
                 }
             }
         } else {
-            console.log('State error: players inconsistent.');
+            console.log('State error: players inconsistent.'); // TODO: Fix for initial startup or refreshing the page.
         }
     });
 

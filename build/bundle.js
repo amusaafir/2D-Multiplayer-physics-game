@@ -444,7 +444,7 @@ Network.prototype.receiveState = function() {
                 }
             }
         } else {
-            console.log('State error: players inconsistent.');
+            console.log('State error: players inconsistent.'); // TODO: Fix for initial startup or refreshing the page.
         }
     });
 
@@ -568,7 +568,9 @@ Renderer.prototype.render = function() {
     // Draw all walls
     for (var i = 0; i < this.game.walls.length; i++) {
         this.game.walls[i].draw();
-        this.game.walls[i].drawShadow();
+        
+        if(this.settings.showServerPosition)
+            this.game.walls[i].drawShadow();
     }    
 
     // Restore transform
@@ -696,6 +698,8 @@ Player.prototype.addMarble = function(id, x, y, renderer, material, input) {
 
 module.exports = Player;
 },{"./Marble.js":7}],9:[function(require,module,exports){
+var Settings = require('../Settings.js');
+
 var Wall = function(x, y, width, height, angle, mass, renderer, material) {
     this.x = x;
     this.y = y;
@@ -712,6 +716,7 @@ var Wall = function(x, y, width, height, angle, mass, renderer, material) {
     this.xPosServer;
     this.yPosServer;
     this.angleServer;
+    this.settings = new Settings();
 
     this.initShape();
     this.initBody();
@@ -743,12 +748,13 @@ Wall.prototype.createGraphics = function() {
     this.graphics.rotation = this.boxBody.angle;
     this.renderer.container.addChild(this.graphics);
 
+    if(this.settings.showServerPosition) {
         this.shadow = new PIXI.Graphics();
         this.shadow.beginFill(0xEEEEEE, 0.5);
-         this.shadow.drawRect(-this.boxShape.width/2, -this.boxShape.height/2, this.boxShape.width, this.boxShape.height);
+        this.shadow.drawRect(-this.boxShape.width/2, -this.boxShape.height/2, this.boxShape.width, this.boxShape.height);
         this.shadow.rotation = this.boxBody.angle;
         this.renderer.container.addChild(this.shadow);
-   
+    }
 };
 
 Wall.prototype.draw = function() {
@@ -764,7 +770,7 @@ Wall.prototype.drawShadow = function() {
 };
 
 module.exports = Wall;
-},{}],10:[function(require,module,exports){
+},{"../Settings.js":6}],10:[function(require,module,exports){
 var Material = function() {
     this.ballMaterial = new p2.Material();
 };
