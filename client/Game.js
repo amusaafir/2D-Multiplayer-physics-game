@@ -106,7 +106,12 @@ Game.prototype.run = function() {
                 var bodies = self.world.getWorld().bodies;
                 for(var i=0; i<bodies.length; i++) { // Enforce v = 0 for all bodies
                     bodies[i].velocity[0] = 0;
-                    bodies[i].velocity[1] = 0; 
+                    bodies[i].velocity[1] = 0;
+                    bodies[i].force[0] = 0;
+                    bodies[i].force[1] = 0;
+                    bodies[i].angularVelocity[0] = 0;
+                    bodies[i].angularVelocity[1] = 0;
+                    
                     self.sync();
                 }
                 self.step = 0;

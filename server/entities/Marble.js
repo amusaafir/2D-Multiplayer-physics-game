@@ -11,7 +11,7 @@ function Marble(id, position, material) {
     this.circleBody = new p2.Body({
         mass: 1,
         position: [position.x, position.y],
-        angularVelocity: 1
+        angularDamping: 1,
     });
     this.circleBody.damping = .7;
     this.circleBody.addShape(this.circleShape);
