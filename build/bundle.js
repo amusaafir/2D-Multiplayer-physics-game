@@ -177,6 +177,7 @@ Game.prototype.sync = function() {
     }
 };
 
+// TODO: Move 'add marbles' to the player class
 /**
  * This function adds a new player to the game.
  * @param {[Number]} id [The id of the to be added player.]
@@ -191,7 +192,7 @@ Game.prototype.addPlayer = function(id, marbles, isMainplayer) {
     }
 
     for(var id=0; id<marbles.length; id++) {
-        player.addMarble(id, marbles[id].position[0], marbles[id].position[1], this.renderer, this.material.getBallMaterial(), input);
+        player.addMarble(id, marbles[id].position[0], marbles[id].position[1], this.renderer, this.material.getBallMaterial(), input, isMainplayer);
         this.world.getWorld().addBody(player.marbles[player.marbles.length-1].circleBody); // Add the body of the (last created) marble to the world
     }
     
@@ -591,18 +592,20 @@ module.exports = Settings;
 },{}],7:[function(require,module,exports){
 var Settings = require('../Settings.js');
 
-var Marble = function(id, x, y, renderer, material, input) {
+var Marble = function(id, x, y, renderer, material, input, isMainPlayer) {
     this.id = id;
     this.circleShape;
     this.circleBody;
+    this.graphics;
     this.shadowX = x;
     this.shadowY = y;
     this.renderer = renderer;
     this.input = input;
     this.settings = new Settings();
+
     this.initCircleShape(material);
     this.initPhysicsBody(x, y);
-    this.createGraphics();
+    this.createGraphics(isMainPlayer);
     this.createHitArea();
 };
 
@@ -634,10 +637,11 @@ Marble.prototype.drawShadow = function() {
     this.shadow.position.set(this.shadowX, this.shadowY);
 };
 
-Marble.prototype.createGraphics = function() {
+Marble.prototype.createGraphics = function(isMainPlayer) {
     this.graphics = new PIXI.Graphics();
     this.graphics.lineStyle(0);
-    this.graphics.beginFill(0xFFFFFF, 1);
+    var color = isMainPlayer ? 0x66FF99 : 0xFFFFFF;
+    this.graphics.beginFill(color, 1);
     this.graphics.drawCircle(0, 0, 1);
     this.graphics.position.set(this.circleBody.position[0], this.circleBody.position[1]);
     this.renderer.container.addChild(this.graphics);
@@ -692,8 +696,9 @@ Player.prototype.drawMarbles = function(showServerPosition) {
 	}
 };
 
-Player.prototype.addMarble = function(id, x, y, renderer, material, input) {
-	this.marbles.push(new Marble(id, x, y, renderer, material, input));
+Player.prototype.addMarble = function(id, x, y, renderer, material, input, isMainPlayer) {
+	var marble = new Marble(id, x, y, renderer, material, input, isMainPlayer);
+	this.marbles.push(marble);
 };
 
 module.exports = Player;
@@ -787,6 +792,9 @@ var World = function(material) {
     this.world.applyDamping = true;
     this.world.sleepMode = p2.World.BODY_SLEEPING;
     this.createMaterials(material);
+    this.world.solver = new p2.GSSolver();
+    this.world.solver.iterations =  20; // Fast, but contacts might look squishy...
+    //this.world.solver.iterations = 50; // Slow, but contacts look good!
 };
 
 World.prototype.createMaterials = function(material) {

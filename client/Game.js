@@ -168,6 +168,7 @@ Game.prototype.sync = function() {
     }
 };
 
+// TODO: Move 'add marbles' to the player class
 /**
  * This function adds a new player to the game.
  * @param {[Number]} id [The id of the to be added player.]
@@ -182,7 +183,7 @@ Game.prototype.addPlayer = function(id, marbles, isMainplayer) {
     }
 
     for(var id=0; id<marbles.length; id++) {
-        player.addMarble(id, marbles[id].position[0], marbles[id].position[1], this.renderer, this.material.getBallMaterial(), input);
+        player.addMarble(id, marbles[id].position[0], marbles[id].position[1], this.renderer, this.material.getBallMaterial(), input, isMainplayer);
         this.world.getWorld().addBody(player.marbles[player.marbles.length-1].circleBody); // Add the body of the (last created) marble to the world
     }
     
