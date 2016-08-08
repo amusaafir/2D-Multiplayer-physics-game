@@ -115,7 +115,12 @@ Game.prototype.run = function() {
                 var bodies = self.world.getWorld().bodies;
                 for(var i=0; i<bodies.length; i++) { // Enforce v = 0 for all bodies
                     bodies[i].velocity[0] = 0;
-                    bodies[i].velocity[1] = 0; 
+                    bodies[i].velocity[1] = 0;
+                    bodies[i].force[0] = 0;
+                    bodies[i].force[1] = 0;
+                    bodies[i].angularVelocity[0] = 0;
+                    bodies[i].angularVelocity[1] = 0;
+                    
                     self.sync();
                 }
                 self.step = 0;
@@ -620,7 +625,7 @@ Marble.prototype.initPhysicsBody = function(x, y) {
     this.circleBody = new p2.Body({
         mass: 1,
         position: [x, y],
-        angularVelocity: 1
+        angularDamping: 1
     });
     this.circleBody.damping = .7;
     this.circleBody.addShape(this.circleShape);
@@ -792,9 +797,6 @@ var World = function(material) {
     this.world.applyDamping = true;
     this.world.sleepMode = p2.World.BODY_SLEEPING;
     this.createMaterials(material);
-    this.world.solver = new p2.GSSolver();
-    this.world.solver.iterations =  20; // Fast, but contacts might look squishy...
-    //this.world.solver.iterations = 50; // Slow, but contacts look good!
 };
 
 World.prototype.createMaterials = function(material) {
