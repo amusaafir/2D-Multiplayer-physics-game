@@ -10,6 +10,7 @@ var Wall = function(x, y, width, height, angle, mass, material) {
     this.material = material;
     this.boxShape;
     this.boxBody;
+    this.isStatic = (mass == 0);
 
     this.initShape();
     this.initBody();
@@ -43,6 +44,7 @@ Wall.prototype.getClientDetails = function() {
         velocity: self.boxBody.velocity,
         angle: self.boxBody.angle,
         mass: self.boxBody.mass,
+        isStatic: self.isStatic,
         angularVelocity: self.boxBody.angularVelocity
     };
 };

@@ -10,6 +10,10 @@ var Wall = function(x, y, width, height, angle, mass, renderer, material) {
     this.boxShape;
     this.boxBody;
     this.graphics;
+    this.shadow;
+    this.xPosServer;
+    this.yPosServer;
+    this.angleServer;
 
     this.initShape();
     this.initBody();
@@ -40,12 +44,25 @@ Wall.prototype.createGraphics = function() {
     this.graphics.drawRect(-this.boxShape.width/2, -this.boxShape.height/2, this.boxShape.width, this.boxShape.height);
     this.graphics.rotation = this.boxBody.angle;
     this.renderer.container.addChild(this.graphics);
+
+        this.shadow = new PIXI.Graphics();
+        this.shadow.beginFill(0xEEEEEE, 0.5);
+         this.shadow.drawRect(-this.boxShape.width/2, -this.boxShape.height/2, this.boxShape.width, this.boxShape.height);
+        this.shadow.rotation = this.boxBody.angle;
+        this.renderer.container.addChild(this.shadow);
+   
 };
 
 Wall.prototype.draw = function() {
     this.graphics.position.x = this.boxBody.position[0];
     this.graphics.position.y = this.boxBody.position[1];
     this.graphics.rotation = this.boxBody.angle;
+};
+
+Wall.prototype.drawShadow = function() {
+    this.shadow.position.x = this.xPosServer;
+    this.shadow.position.y = this.yPosServer;
+    this.shadow.rotation = this.angleServer;
 };
 
 module.exports = Wall;

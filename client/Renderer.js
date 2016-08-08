@@ -62,6 +62,7 @@ Renderer.prototype.render = function() {
     // Draw all walls
     for (var i = 0; i < this.game.walls.length; i++) {
         this.game.walls[i].draw();
+        this.game.walls[i].drawShadow();
     }    
 
     // Restore transform

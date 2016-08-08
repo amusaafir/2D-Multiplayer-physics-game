@@ -280,7 +280,7 @@ Game.prototype.drawTrajectory = function(x, y) {
     
 };
 
-Game.prototype.addWall = function(x, y, width, height, angle, mass, velocity, angularVelocity, angle) {
+Game.prototype.addWall = function(x, y, width, height, angle, mass, velocity, angularVelocity) {
     var wall = new Wall(x, y, width, height, angle, mass, this.renderer, this.material.getBallMaterial());
     wall.boxBody.angle = angle;
     wall.boxBody.velocity = velocity;
@@ -390,7 +390,8 @@ Network.prototype.getWalls = function() {
 
     this.socket.on('getWalls', function(wallsData) {
         for (var i = 0; i < wallsData.length; i++) {
-            self.game.addWall(wallsData[i].position[0], wallsData[i].position[1], wallsData[i].width, wallsData[i].height, wallsData[i].angle, wallsData[i].mass, wallsData[i].velocity, wallsData[i].angularVelocity, wallsData[i].angle);
+            var mass = (wallsData[i].isStatic) ? 0 : wallsData[i].mass; // Has to be 0 if it is static
+            self.game.addWall(wallsData[i].position[0], wallsData[i].position[1], wallsData[i].width, wallsData[i].height, wallsData[i].angle, mass, wallsData[i].velocity, wallsData[i].angularVelocity);
         }
     });
 };
@@ -440,6 +441,25 @@ Network.prototype.receiveState = function() {
                         self.game.players[i].marbles[m].shadowX = playersData[i].marbles[m].position[0];
                         self.game.players[i].marbles[m].shadowY = playersData[i].marbles[m].position[1];
                     }
+                }
+            }
+        } else {
+            console.log('State error: players inconsistent.');
+        }
+    });
+
+    this.socket.on('stateWalls', function(wallsData) { // List containing clientdata for each player
+        if(wallsData.length == self.game.walls.length) {
+            for(var i = 0; i < self.game.walls.length; i++) {
+                var wall = wallsData[i];
+
+                if(wallsData.length != self.game.walls.length) {
+                    console.log('Inconsistent marbles for player ' + i);
+                    continue;
+                } else {
+                        self.game.walls[i].xPosServer = wallsData[i].position[0];
+                        self.game.walls[i].yPosServer = wallsData[i].position[1];
+                        self.game.walls[i].angleServer = wallsData[i].angle;
                 }
             }
         } else {
@@ -548,6 +568,7 @@ Renderer.prototype.render = function() {
     // Draw all walls
     for (var i = 0; i < this.game.walls.length; i++) {
         this.game.walls[i].draw();
+        this.game.walls[i].drawShadow();
     }    
 
     // Restore transform
@@ -687,6 +708,10 @@ var Wall = function(x, y, width, height, angle, mass, renderer, material) {
     this.boxShape;
     this.boxBody;
     this.graphics;
+    this.shadow;
+    this.xPosServer;
+    this.yPosServer;
+    this.angleServer;
 
     this.initShape();
     this.initBody();
@@ -717,12 +742,25 @@ Wall.prototype.createGraphics = function() {
     this.graphics.drawRect(-this.boxShape.width/2, -this.boxShape.height/2, this.boxShape.width, this.boxShape.height);
     this.graphics.rotation = this.boxBody.angle;
     this.renderer.container.addChild(this.graphics);
+
+        this.shadow = new PIXI.Graphics();
+        this.shadow.beginFill(0xEEEEEE, 0.5);
+         this.shadow.drawRect(-this.boxShape.width/2, -this.boxShape.height/2, this.boxShape.width, this.boxShape.height);
+        this.shadow.rotation = this.boxBody.angle;
+        this.renderer.container.addChild(this.shadow);
+   
 };
 
 Wall.prototype.draw = function() {
     this.graphics.position.x = this.boxBody.position[0];
     this.graphics.position.y = this.boxBody.position[1];
     this.graphics.rotation = this.boxBody.angle;
+};
+
+Wall.prototype.drawShadow = function() {
+    this.shadow.position.x = this.xPosServer;
+    this.shadow.position.y = this.yPosServer;
+    this.shadow.rotation = this.angleServer;
 };
 
 module.exports = Wall;
