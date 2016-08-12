@@ -23,6 +23,7 @@ DefaultMap.prototype.initPlayerPositions = function() {
             this.positions.push(new Position(x, y));
         }
     }
+    //this.positions.push(new Position(-10, 0));
 };
 
 DefaultMap.prototype.createWalls = function() {
@@ -30,10 +31,10 @@ DefaultMap.prototype.createWalls = function() {
     this.addWall(0, 2, 4, 4, 10, 10, this.material.getBallMaterial());
 
     // Sides
-    this.addWall(-24, 0, 1, 28, 0, 0, this.material.getBallMaterial());
-    this.addWall(24, 0, 1, 28, 0, 0, this.material.getBallMaterial());
-    this.addWall(0, -13, 46.99, 1, 0, 0, this.material.getBallMaterial());
-    this.addWall(0, 13, 46.99, 1, 0, 0, this.material.getBallMaterial());  
+    this.addWall(-28, 0, 10, 28, 0, 0, this.material.getBallMaterial());
+    this.addWall(28, 0, 10, 28, 0, 0, this.material.getBallMaterial());
+    this.addWall(0, -18, 46.99, 10, 0, 0, this.material.getBallMaterial());
+    this.addWall(0, 18, 46.99, 10, 0, 0, this.material.getBallMaterial());  
 };
 
 DefaultMap.prototype.addWall = function(x, y, width, height, angle, mass, material) {
