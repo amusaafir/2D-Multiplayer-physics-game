@@ -66,12 +66,9 @@ var Game = function() {
         request: false
     };
 
-    this.maxStep = 1000;
-
+    this.maxStep= 400;
     this.step = 0;
-
     this.countSteps = false;
-
     this.clientData = {};
 
     /**
@@ -97,29 +94,19 @@ Game.prototype.run = function() {
     var self = this;
 
     setInterval(function() {
-        self.world.getWorld().step(1 / 120);
+        self.world.getWorld().step(1 / 60);
         
         if(self.countSteps) {
             self.step++;
-            if(self.step==self.maxStep) {
+            if(self.step == self.maxStep) {
                 console.log('Enforce v=0.');
-                var bodies = self.world.getWorld().bodies;
-                for(var i=0; i<bodies.length; i++) { // Enforce v = 0 for all bodies
-                    bodies[i].velocity[0] = 0;
-                    bodies[i].velocity[1] = 0;
-                    bodies[i].force[0] = 0;
-                    bodies[i].force[1] = 0;
-                    bodies[i].angularVelocity[0] = 0;
-                    bodies[i].angularVelocity[1] = 0;
-                    
-                    self.sync();
-                }
+                self.zeroAllBodyVelocities();
+                self.sync();
                 self.step = 0;
                 self.countSteps = false;
             }
         }
-
-    }, 1000 / 120);
+    }, 1000 / 60);
 };
 
 /**
@@ -134,6 +121,19 @@ Game.prototype.draw = function() {
     function draw() {
         requestAnimationFrame(draw);
         self.renderer.render();
+    }
+};
+
+// Set all the velocities of the physics bodies to 0
+Game.prototype.zeroAllBodyVelocities = function() {
+    var bodies = this.world.getWorld().bodies;
+    for(var i=0; i<bodies.length; i++) {
+        bodies[i].velocity[0] = 0;
+        bodies[i].velocity[1] = 0;
+        bodies[i].force[0] = 0;
+        bodies[i].force[1] = 0;
+        bodies[i].angularVelocity[0] = 0;
+        bodies[i].angularVelocity[1] = 0;
     }
 };
 

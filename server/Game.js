@@ -23,7 +23,7 @@ function Game(io) {
 
     this.countSteps = false;
     this.step = 0;
-    this.maxStep = 1000;
+    this.maxStep = 400; // Should match or be smaller than the client's maxStep
 
     this.run();
     this.sendState();
@@ -37,7 +37,7 @@ Game.prototype.run = function() {
         var simulationSpeed = 2;
 
         for(var i=0; i<simulationSpeed; i++) {
-            self.world.world.step(1 / 120);
+            self.world.world.step(1 / 60);
             if(self.countSteps) {
                 self.step++;
                 if(self.step==self.maxStep) {
@@ -57,7 +57,7 @@ Game.prototype.run = function() {
                 }
             }
         }
-    }, 1000 / 120);
+    }, 1000 / 60);
 };
 
 // TODO: Remove later (only for debugging)
