@@ -1,3 +1,5 @@
+var io = require('socket.io-client');
+
 var Network = function(game) {
     this.game = game;
     this.socket = io.connect();

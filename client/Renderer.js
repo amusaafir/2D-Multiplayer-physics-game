@@ -14,7 +14,7 @@ Renderer.prototype.initRenderer = function() {
     var width = 1920;
     var height = 1080;
     
-    this.renderer = PIXI.autoDetectRenderer(width, height);
+    this.renderer = PIXI.autoDetectRenderer(width, height, {antialias: true});
     this.ratio = width / height;
 
     this.resize(); // Resize the render according to the client's screen
