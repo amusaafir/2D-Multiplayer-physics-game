@@ -30,6 +30,7 @@ function Game(io) {
     this.postStep();
 }
 
+// TODO: Extract v=0 part to a separate function
 Game.prototype.run = function() {
     var self = this;
 
