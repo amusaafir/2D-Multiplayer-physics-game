@@ -10,9 +10,20 @@ var Input = function(game) {
     		y: 0
     	}
     };
-
     this.game = game;
+    this.drawLine = false;
+    this.line = new PIXI.Graphics().lineStyle(.1, 0xFFFFFF);
+    this.game.renderer.container.addChild(this.line);
     this.initInputEvents();
+};
+
+Input.prototype.drawTrajectory = function() {
+    if(this.line&&this.drawLine) {
+        this.line.clear();
+        this.line.lineStyle(.1, 0xFFFFFF);
+        this.line.moveTo(this.trajectory.startVector.x, this.trajectory.startVector.y);
+        this.line.lineTo(this.game.renderer.getLocalMousePosition().x, this.game.renderer.getLocalMousePosition().y);
+    }
 };
 
 Input.prototype.initInputEvents = function() {
@@ -28,6 +39,8 @@ Input.prototype.initInputEvents = function() {
         var yTrajectory = self.trajectory.endVector.y - self.trajectory.startVector.y;
 
         self.game.trajectory(self.trajectory.marbleId, xTrajectory, yTrajectory);
+        self.drawLine = false;
+        self.line.clear();
     };
 };
 
@@ -38,6 +51,7 @@ Input.prototype.clickedOnCircle = function(marbleId, x, y) {
 		x: x,
 		y: y
 	};
+    this.drawLine = true;
 };
 
 // Trajectory method here?

@@ -12,8 +12,6 @@ var Renderer = require('./Renderer.js');
  * seen as the core class of the entire game.
  */
 var Game = function() {
-    this.input = new Input(this);
-
     /**
      * The Network object with the current game instance.
      * @type {Network}
@@ -57,6 +55,8 @@ var Game = function() {
      * @type {Renderer}
      */
     this.renderer = new Renderer(this, this.settings);
+
+    this.input = new Input(this);
 
     this.applyForce = {
         playerId: null,

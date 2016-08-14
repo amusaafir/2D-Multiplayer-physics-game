@@ -67,6 +67,9 @@ Renderer.prototype.render = function() {
             this.game.walls[i].drawShadow();
     }    
 
+    // Draw trajectory
+    this.game.input.drawTrajectory();
+
     // Restore transform
     this.renderer.render(this.container);
 };

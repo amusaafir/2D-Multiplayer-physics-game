@@ -23,8 +23,6 @@ var Renderer = require('./Renderer.js');
  * seen as the core class of the entire game.
  */
 var Game = function() {
-    this.input = new Input(this);
-
     /**
      * The Network object with the current game instance.
      * @type {Network}
@@ -68,6 +66,8 @@ var Game = function() {
      * @type {Renderer}
      */
     this.renderer = new Renderer(this, this.settings);
+
+    this.input = new Input(this);
 
     this.applyForce = {
         playerId: null,
@@ -311,9 +311,20 @@ var Input = function(game) {
     		y: 0
     	}
     };
-
     this.game = game;
+    this.drawLine = false;
+    this.line = new PIXI.Graphics().lineStyle(.1, 0xFFFFFF);
+    this.game.renderer.container.addChild(this.line);
     this.initInputEvents();
+};
+
+Input.prototype.drawTrajectory = function() {
+    if(this.line&&this.drawLine) {
+        this.line.clear();
+        this.line.lineStyle(.1, 0xFFFFFF);
+        this.line.moveTo(this.trajectory.startVector.x, this.trajectory.startVector.y);
+        this.line.lineTo(this.game.renderer.getLocalMousePosition().x, this.game.renderer.getLocalMousePosition().y);
+    }
 };
 
 Input.prototype.initInputEvents = function() {
@@ -329,6 +340,8 @@ Input.prototype.initInputEvents = function() {
         var yTrajectory = self.trajectory.endVector.y - self.trajectory.startVector.y;
 
         self.game.trajectory(self.trajectory.marbleId, xTrajectory, yTrajectory);
+        self.drawLine = false;
+        self.line.clear();
     };
 };
 
@@ -339,6 +352,7 @@ Input.prototype.clickedOnCircle = function(marbleId, x, y) {
 		x: x,
 		y: y
 	};
+    this.drawLine = true;
 };
 
 // Trajectory method here?
@@ -582,6 +596,9 @@ Renderer.prototype.render = function() {
         if(this.settings.showServerPosition)
             this.game.walls[i].drawShadow();
     }    
+
+    // Draw trajectory
+    this.game.input.drawTrajectory();
 
     // Restore transform
     this.renderer.render(this.container);
